@@ -1,0 +1,14 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: splunk-hec
+  namespace: splunk
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+spec:
+  host: splunk-hec-splunk.apps.sno.shanehomelab.com
+  to:
+    kind: Service
+    name: splunk-splunk-s1-standalone-service
+  port:
+    targetPort: http-hec

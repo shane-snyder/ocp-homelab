@@ -1,0 +1,20 @@
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: demo-restore
+  namespace: openshift-adp
+spec:
+  backupName: demo-backup
+  restorePVs: true
+  defaultVolumesToFsBackup: true
+  excludedResources:
+  - nodes
+  - events
+  - events.events.k8s.io
+  - backups.velero.io
+  - restores.velero.io
+  - resticrepositories.velero.io
+  - csinodes.storage.k8s.io
+  - volumeattachments.storage.k8s.io
+  - backuprepositories.velero.io
+  itemOperationTimeout: 4h0m0s

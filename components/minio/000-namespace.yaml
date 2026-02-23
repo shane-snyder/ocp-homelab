@@ -1,0 +1,23 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    operator.min.io/authors: 'MinIO, Inc.'	
+    operator.min.io/license: AGPLv3	
+    operator.min.io/support: 'https://subnet.min.io'
+    openshift.io/sa.scc.mcs: 's0:c26,c20'
+    openshift.io/sa.scc.supplemental-groups: 1000/10000
+    openshift.io/sa.scc.uid-range: 1000/10000
+  labels:
+    kubernetes.io/metadata.name: minio-operator
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: v1.24
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: v1.24
+  name: minio-operator
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active

@@ -1,0 +1,31 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+  creationTimestamp: "2024-05-23T16:48:30Z"
+  labels:
+    v1.min.io/tenant: minio-quay
+  name: minio
+  namespace: quay-enterprise
+  resourceVersion: "17567498"
+  uid: 7987bfe6-5246-496c-8723-311bb1d68b26
+spec:
+  host: minio-quay-enterprise.apps.sno.shanehomelab.com
+  port:
+    targetPort: http-minio
+  to:
+    kind: Service
+    name: minio
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2024-05-23T16:48:30Z"
+      status: "True"
+      type: Admitted
+    host: minio-quay-enterprise.apps.sno.shanehomelab.com
+    routerCanonicalHostname: router-default.apps.sno.shanehomelab.com
+    routerName: default
+    wildcardPolicy: None

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-writer
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-writer
+  template:
+    metadata:
+      labels:
+        app: file-writer
+    spec:
+      containers:
+        - name: writer
+          image: busybox
+          command: ["/bin/sh", "-c"]
+          args: ["while true; do echo $(date) >> /mnt/data/demo.txt; sleep 5; done"]
+          volumeMounts:
+            - name: data
+              mountPath: /mnt/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: file-pvc

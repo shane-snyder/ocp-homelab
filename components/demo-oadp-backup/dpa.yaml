@@ -1,0 +1,33 @@
+apiVersion: oadp.openshift.io/v1alpha1
+kind: DataProtectionApplication
+metadata:
+  name: oadp-backup
+  namespace: openshift-adp
+spec:
+  configuration:
+    velero:
+      defaultPlugins:
+        - openshift
+        - aws
+      featureFlags:
+        - EnableCSI
+    nodeAgent:
+      enable: true
+      uploaderType: restic
+  backupLocations:
+    - name: oadp-backup
+      velero:
+        provider: aws
+        default: true
+        objectStorage:
+          bucket: oadp-backup
+          prefix: backups
+        config:
+          region: minio
+          s3Url: https://minio-openshift-adp.apps.sno.shanehomelab.com
+          insecureSkipTLSVerify: "true"
+          s3ForcePathStyle: "true"
+        credential:
+          name: cloud-credentials
+          key: cloud
+

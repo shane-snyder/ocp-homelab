@@ -1,0 +1,49 @@
+apiVersion: platform.stackrox.io/v1alpha1
+kind: SecuredCluster
+metadata:
+  finalizers:
+    - uninstall-helm-release
+  name: stackrox-secured-cluster-services
+  namespace: stackrox
+spec:
+  admissionControl:
+    bypass: BreakGlassAnnotation
+    contactImageScanners: DoNotScanInline
+    listenOnCreates: true
+    listenOnEvents: true
+    listenOnUpdates: true
+    replicas: 3
+    timeoutSeconds: 20
+  auditLogs:
+    collection: Auto
+  centralEndpoint: 'central-stackrox.apps.sno.shanehomelab.com:443'
+  clusterName: sno-mini
+  monitoring:
+    openshift:
+      enabled: true
+  perNode:
+    collector:
+      collection: CORE_BPF
+      forceCollection: false
+      imageFlavor: Regular
+    taintToleration: TolerateTaints
+  scanner:
+    analyzer:
+      scaling:
+        autoScaling: Enabled
+        maxReplicas: 5
+        minReplicas: 2
+        replicas: 3
+    scannerComponent: AutoSense
+  scannerV4:
+    db:
+      persistence:
+        persistentVolumeClaim:
+          claimName: scanner-v4-db
+    indexer:
+      scaling:
+        autoScaling: Enabled
+        maxReplicas: 5
+        minReplicas: 2
+        replicas: 3
+    scannerComponent: AutoSense

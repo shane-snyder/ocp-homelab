@@ -1,0 +1,22 @@
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: demo-oadp-backup:velero.io/Backup:openshift-adp/demo-backup
+    velero.io/resource-timeout: 10m0s
+    velero.io/source-cluster-k8s-gitversion: v1.31.8
+    velero.io/source-cluster-k8s-major-version: "1"
+    velero.io/source-cluster-k8s-minor-version: "31"
+  labels:
+    velero.io/storage-location: oadp-backup
+  name: demo-backup
+  namespace: openshift-adp
+spec:
+  csiSnapshotTimeout: 10m0s
+  defaultVolumesToFsBackup: false
+  includedNamespaces:
+  - demo
+  itemOperationTimeout: 4h0m0s
+  snapshotMoveData: false
+  storageLocation: oadp-backup
+  ttl: 720h0m0s

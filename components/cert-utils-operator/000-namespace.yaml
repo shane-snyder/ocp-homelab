@@ -1,0 +1,19 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
+    openshift.io/sa.scc.mcs: s0:c29,c24
+    openshift.io/sa.scc.supplemental-groups: 1000860000/10000
+    openshift.io/sa.scc.uid-range: 1000860000/10000
+  labels:
+    kubernetes.io/metadata.name: cert-utils-operator
+    openshift.io/cluster-monitoring: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: v1.24
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: v1.24
+  name: cert-utils-operator
+spec:
+  finalizers:
+  - kubernetes

@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: minio-nodeport
+  namespace: quay-enterprise
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  type: NodePort
+  selector:
+    v1.min.io/tenant: minio-quay
+  ports:
+    - name: http-minio
+      protocol: TCP
+      port: 80
+      targetPort: 9000
+      nodePort: 32080
+  sessionAffinity: None
+  internalTrafficPolicy: Cluster

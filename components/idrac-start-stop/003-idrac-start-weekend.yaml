@@ -1,0 +1,49 @@
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: idrac-start-weekend
+  namespace: idrac
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: set-fan-speed-60-weekend
+            image: quay-server.apps.sno-mini.shanehomelab.com/containers/ipmitool:latest
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - |
+              ipmitool -I lanplus -H "$IDRAC_HOST" -U "$IDRAC_USER" -P "$IDRAC_PASSWORD" chassis power on
+            env:
+            - name: IDRAC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-secret
+                  key: IDRAC_PASSWORD
+            - name: IDRAC_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-secret
+                  key: IDRAC_HOST
+            - name: IDRAC_USER
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-secret
+                  key: IDRAC_USER
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          terminationGracePeriodSeconds: 30
+  schedule: 30 6 * * 0,6
+  successfulJobsHistoryLimit: 3
+  suspend: false
+  timeZone: America/New_York
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+

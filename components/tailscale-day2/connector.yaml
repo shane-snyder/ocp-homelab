@@ -1,0 +1,10 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: ts-exit-node
+spec:
+  exitNode: true
+  hostname: sno-exit
+  subnetRouter:
+    advertiseRoutes:
+    - 192.168.1.0/24

@@ -1,0 +1,320 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - "**/*.yaml"
+      - "**/*.yml"
+
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  ARGOCD_VERSION: "v2.10.0"
+  KUBECONFORM_VERSION: "v0.6.4"
+  KUSTOMIZE_VERSION: "v5.3.0"
+  KUBE_VERSION: "1.28.0"
+
+jobs:
+  detect-changes:
+    name: Detect Changed Paths
+    runs-on: ubuntu-latest
+    outputs:
+      changed_apps: ${{ steps.detect.outputs.changed_apps }}
+      has_changes: ${{ steps.detect.outputs.has_changes }}
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **/*.yaml
+            **/*.yml
+
+      - name: Detect affected Kustomize overlays & plain YAML dirs
+        id: detect
+        run: |
+          set -euo pipefail
+          declare -A seen
+          apps=()
+
+          for file in ${{ steps.changed_files.outputs.all_changed_files }}; do
+            dir=$(dirname "$file")
+            while [[ "$dir" != "." && "$dir" != "/" ]]; do
+              if [[ -f "$dir/kustomization.yaml" || -f "$dir/kustomization.yml" ]]; then
+                if [[ -z "${seen[$dir]+x}" ]]; then
+                  seen["$dir"]=1
+                  apps+=("$dir")
+                fi
+                break
+              fi
+              dir=$(dirname "$dir")
+            done
+
+            if [[ ${#apps[@]} -eq 0 || -z "${seen[$(dirname "$file")]+x}" ]]; then
+              raw_dir=$(dirname "$file")
+              if [[ -z "${seen[$raw_dir]+x}" ]]; then
+                seen["$raw_dir"]=1
+                apps+=("$raw_dir")
+              fi
+            fi
+          done
+
+          if [[ ${#apps[@]} -eq 0 ]]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "changed_apps=[]" >> "$GITHUB_OUTPUT"
+          else
+            json=$(printf '%s\n' "${apps[@]}" | jq -R . | jq -sc .)
+            echo "changed_apps=$json" >> "$GITHUB_OUTPUT"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Detected changed app paths: $json"
+          fi
+
+  kustomize-build:
+    name: Kustomize Build
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Kustomize
+        run: |
+          curl -sLo /tmp/kustomize.tar.gz \
+            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${{ env.KUSTOMIZE_VERSION }}/kustomize_${{ env.KUSTOMIZE_VERSION }}_linux_amd64.tar.gz"
+          tar -xzf /tmp/kustomize.tar.gz -C /usr/local/bin
+          kustomize version
+
+      - name: Build all detected Kustomize overlays
+        id: build
+        run: |
+          set -euo pipefail
+          APPS='${{ needs.detect-changes.outputs.changed_apps }}'
+          mkdir -p /tmp/rendered
+          failed=()
+
+          while IFS= read -r path; do
+            if [[ -f "$path/kustomization.yaml" || -f "$path/kustomization.yml" ]]; then
+              echo "::group::kustomize build $path"
+              safe_name=$(echo "$path" | tr '/' '_')
+              if kustomize build "$path" --enable-helm --enable-alpha-plugins --load-restrictor LoadRestrictionsNone > "/tmp/rendered/${safe_name}.yaml" 2>&1; then
+                echo "  $path"
+              else
+                echo "  $path - build failed"
+                failed+=("$path")
+              fi
+              echo "::endgroup::"
+            else
+              echo "  $path has no kustomization.yaml, skipping kustomize build"
+            fi
+          done < <(echo "$APPS" | jq -r '.[]')
+
+          if [[ ${#failed[@]} -gt 0 ]]; then
+            echo "::error::Kustomize build failed for: ${failed[*]}"
+            exit 1
+          fi
+
+      - name: Upload rendered manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-manifests
+          path: /tmp/rendered/
+          retention-days: 3
+
+  schema-validation:
+    name: Schema Validation (kubeconform)
+    runs-on: ubuntu-latest
+    needs: [detect-changes, kustomize-build]
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download rendered manifests
+        uses: actions/download-artifact@v4
+        with:
+          name: rendered-manifests
+          path: /tmp/rendered
+
+      - name: Install kubeconform
+        run: |
+          curl -sLo /tmp/kubeconform.tar.gz \
+            "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz"
+          tar -xzf /tmp/kubeconform.tar.gz -C /usr/local/bin
+          kubeconform -v
+
+      - name: Validate rendered manifests
+        run: |
+          set -euo pipefail
+          if ls /tmp/rendered/*.yaml 1>/dev/null 2>&1; then
+            echo "::group::Validating rendered manifests"
+            kubeconform \
+              -kubernetes-version "${{ env.KUBE_VERSION }}" \
+              -schema-location default \
+              -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+              -summary \
+              -output pretty \
+              -ignore-missing-schemas \
+              /tmp/rendered/*.yaml
+            echo "::endgroup::"
+          fi
+
+      - name: Validate plain YAML files (non-kustomize)
+        run: |
+          set -euo pipefail
+          APPS='${{ needs.detect-changes.outputs.changed_apps }}'
+
+          while IFS= read -r path; do
+            if [[ ! -f "$path/kustomization.yaml" && ! -f "$path/kustomization.yml" ]]; then
+              echo "::group::Validating plain YAMLs in $path"
+              find "$path" -name "*.yaml" -o -name "*.yml" | xargs kubeconform \
+                -kubernetes-version "${{ env.KUBE_VERSION }}" \
+                -schema-location default \
+                -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+                -summary \
+                -output pretty \
+                -ignore-missing-schemas || true
+              echo "::endgroup::"
+            fi
+          done < <(echo "$APPS" | jq -r '.[]')
+
+  argocd-diff:
+    name: ArgoCD Diff
+    runs-on: ubuntu-latest
+    needs: [detect-changes, kustomize-build]
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sLo /usr/local/bin/argocd \
+            "https://github.com/argoproj/argo-cd/releases/download/${{ env.ARGOCD_VERSION }}/argocd-linux-amd64"
+          chmod +x /usr/local/bin/argocd
+          argocd version --client
+
+      - name: Login to ArgoCD
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+        run: |
+          argocd login "$ARGOCD_SERVER" \
+            --auth-token "$ARGOCD_AUTH_TOKEN" \
+            --grpc-web \
+            --insecure
+
+      - name: Login to OpenShift
+        env:
+          OC_SERVER: ${{ secrets.OC_SERVER }}
+          OC_TOKEN: ${{ secrets.OC_TOKEN }}
+        run: |
+          curl -sLo /tmp/oc.tar.gz \
+            "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz"
+          tar -xzf /tmp/oc.tar.gz -C /usr/local/bin oc
+          oc login "$OC_SERVER" --token="$OC_TOKEN" --insecure-skip-tls-verify
+
+      - name: Run ArgoCD diff for each affected app
+        id: diff
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+        run: |
+          set -euo pipefail
+          APPS='${{ needs.detect-changes.outputs.changed_apps }}'
+          DIFF_OUTPUT=""
+
+          ALL_ARGOCD_APPS=$(argocd app list -o json)
+
+          while IFS= read -r changed_path; do
+            matching_apps=$(echo "$ALL_ARGOCD_APPS" | jq -r \
+              --arg path "$changed_path" \
+              '.[] | select(.spec.source.path == $path or (.spec.source.path | startswith($path))) | .metadata.name')
+
+            if [[ -z "$matching_apps" ]]; then
+              echo "  No ArgoCD app found for path: $changed_path"
+              continue
+            fi
+
+            while IFS= read -r app; do
+              echo "::group::argocd app diff $app"
+              diff_result=$(argocd app diff "$app" \
+                --local "$changed_path" \
+                --exit-code=false 2>&1 || true)
+
+              if [[ -n "$diff_result" ]]; then
+                DIFF_OUTPUT+="### \`$app\` ($changed_path)\n\`\`\`diff\n${diff_result}\n\`\`\`\n\n"
+              else
+                DIFF_OUTPUT+="### \`$app\` - No diff\n\n"
+              fi
+              echo "::endgroup::"
+            done <<< "$matching_apps"
+          done < <(echo "$APPS" | jq -r '.[]')
+
+          echo "$DIFF_OUTPUT" > /tmp/diff_output.md
+          echo "has_diff=$([ -n "$DIFF_OUTPUT" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Post diff as PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const diffContent = fs.readFileSync('/tmp/diff_output.md', 'utf8');
+
+            const header = `## ArgoCD Diff Report\n\n` +
+              `> Generated for commit \`${{ github.event.pull_request.head.sha }}\`\n\n`;
+
+            const body = diffContent.trim().length > 0
+              ? header + diffContent
+              : header + `_No ArgoCD apps were affected by the changes in this PR._`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('ArgoCD Diff Report')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  all-checks-passed:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [kustomize-build, schema-validation, argocd-diff]
+    if: always()
+    steps:
+      - name: Evaluate results
+        run: |
+          results='${{ toJSON(needs) }}'
+          failed=$(echo "$results" | jq -r 'to_entries[] | select(.value.result == "failure") | .key')
+          if [[ -n "$failed" ]]; then
+            echo "::error::The following jobs failed: $failed"
+            exit 1
+          fi
+          echo "All validation jobs passed."

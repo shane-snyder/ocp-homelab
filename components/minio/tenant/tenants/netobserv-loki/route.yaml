@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+  labels:
+    v1.min.io/tenant: minio-netobserv-loki
+  name: minio
+  namespace: netobserv
+spec:
+  host: minio-netobserv-loki.apps.sno.shanehomelab.com
+  port:
+    targetPort: http-minio
+  to:
+    kind: Service
+    name: minio
+    weight: 100
+  wildcardPolicy: None

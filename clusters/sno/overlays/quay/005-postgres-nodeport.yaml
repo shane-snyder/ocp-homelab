@@ -1,0 +1,23 @@
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    quay-component: postgres
+    quay-operator-service-endpoint: 'http://quay-operator.openshift-operators.svc.cluster.local:7071'
+    quay-registry-hostname: quay-server.apps.sno.shanehomelab.com
+  name: quay-registry-quay-database-nodeport
+  namespace: quay-enterprise
+  labels:
+    quay-component: postgres
+    quay-operator/quayregistry: quay-registry
+spec:
+  type: NodePort
+  ports:
+    - name: postgres
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+      nodePort: 30432  # Assigned NodePort
+  selector:
+    quay-component: postgres

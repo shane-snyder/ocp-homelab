@@ -1,0 +1,11 @@
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  creationTimestamp: null
+  name: cluster-admins
+  annotations:
+    argocd.argoproj.io/sync-wave: '3'
+  labels:
+    argocd.argoproj.io/application: gitops
+users:
+- shane

@@ -1,0 +1,23 @@
+[
+    {
+      "op": "replace",
+      "path": "/metadata/name",
+      "value": "sno-mini-api-cert"
+    },
+    {
+      "op": "replace",
+      "path": "/spec/commonName",
+      "value": "api.sno-mini.shanehomelab.com"
+    },
+    {
+      "op": "replace",
+      "path": "/spec/dnsNames",
+      "value": ["api.sno-mini.shanehomelab.com"]
+    },
+    {
+      "op": "replace",
+      "path": "/spec/secretName",
+      "value": "api-ca-sno-mini"
+    }
+  ]
+  

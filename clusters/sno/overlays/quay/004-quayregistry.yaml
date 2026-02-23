@@ -1,0 +1,37 @@
+apiVersion: quay.redhat.com/v1
+kind: QuayRegistry
+metadata:
+  name: quay-registry
+  namespace: quay-enterprise
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  configBundleSecret: config-bundle-secret
+  components:
+    - kind: objectstorage
+      managed: false
+    - kind: clair
+      managed: true 
+    - kind: horizontalpodautoscaler
+      managed: false
+    - kind: mirror
+      managed: false
+    - kind: monitoring
+      managed: true
+    - kind: postgres
+      managed: true
+    - kind: quay
+      managed: true
+      overrides:
+        replicas: 1
+        env:
+          - name: QUAY_DISTRIBUTED_STORAGE_PREFERENCE
+            value: minio
+    - kind: redis
+      managed: true
+    - kind: route
+      managed: true
+    - kind: tls
+      managed: true
+    - kind: clairpostgres
+      managed: false

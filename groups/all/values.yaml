@@ -1,0 +1,67 @@
+projects:
+  cluster-config:
+    annotations: {}
+    description: Cluster configuration project
+    sourceRepos:
+      - https://github.com/shane-snyder/ocp-homelab.git
+    destinations: |-
+      - namespace: '*'
+        server: https://kubernetes.default.svc
+    extraFields: |
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+
+  external:
+    annotations: {}
+    description: External applications project
+    sourceRepos:
+      - '*'
+    destinations: |-
+      - namespace: '*'
+        server: '*'
+    extraFields: |
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+
+applications:
+  cert-manager-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/cert-manager-operator
+    destination:
+      namespace: cert-manager-operator
+
+  cert-utils-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/cert-utils-operator
+    destination:
+      namespace: cert-utils-operator
+
+  acs-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/acs-operator
+    destination:
+      namespace: rhacs-operator
+
+  external-secrets-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/external-secrets-operator
+    destination:
+      namespace: external-secrets
+
+  redhat-opentelemetry-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/redhat-opentelemetry-operator
+    destination:
+      namespace: openshift-opentelemetry-operator

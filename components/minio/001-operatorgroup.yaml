@@ -1,0 +1,11 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  annotations:
+    olm.providedAPIs: MinIOJob.v1alpha1.job.min.io,PolicyBinding.v1alpha1.sts.min.io,Tenant.v2.minio.min.io
+    argocd.argoproj.io/sync-wave: "1"
+  generateName: minio-operator-
+  name: minio-operator-wg88k
+  namespace: minio-operator
+spec:
+  upgradeStrategy: Default

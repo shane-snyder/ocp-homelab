@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: idrac-stop-weekday
+  namespace: idrac
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - command:
+            - /bin/sh
+            - -c
+            - |
+              export KUBECONFIG=/tmp/.kube/config
+              oc login -u "$OC_USER" -p "$OC_PASSWORD" --server=https://$API_SERVER:6443
+              EXPIRY_DATE=$(oc -n openshift-kube-apiserver-operator get secret kube-apiserver-to-kubelet-signer -o jsonpath='{.metadata.annotations.auth\.openshift\.io/certificate-not-after}')
+              CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+              echo -e "Cert expiry date is $EXPIRY_DATE. Today's date is $CURRENT_DATE"
+              if [ $(date -d "$EXPIRY_DATE" +%s) -le $(($(date -d "$CURRENT_DATE" +%s) + 259200)) ]; then
+                echo "cert expiring on $EXPIRY_DATE"
+                exit 0
+              else
+                ipmitool -I lanplus -H "$IDRAC_HOST" -U "$IDRAC_USER" -P "$IDRAC_PASSWORD" chassis power off
+              fi
+            env:
+            - name: OC_USER
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-secret
+                  key: OC_USER
+            - name: IDRAC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: IDRAC_PASSWORD
+                  name: idrac-secret
+            - name: IDRAC_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-secret
+                  key: IDRAC_HOST
+            - name: IDRAC_USER
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-secret
+                  key: IDRAC_USER
+            - name: API_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-secret
+                  key: API_SERVER
+            image: quay-server.apps.sno-mini.shanehomelab.com/containers/ipmitool:latest
+            imagePullPolicy: IfNotPresent
+            name: set-fan-speed-40
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          terminationGracePeriodSeconds: 30
+  schedule: 00 23 * * 1-5
+  successfulJobsHistoryLimit: 3
+  suspend: false
+  timeZone: America/New_York
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1

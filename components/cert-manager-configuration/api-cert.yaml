@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-cert
+  namespace: openshift-config
+spec:
+  commonName: api.replaceme.com
+  dnsNames:
+  - api.replaceme.com
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-cloudflare
+  renewBefore: 168h
+  secretName: replaceme
+  secretTemplate:
+    annotations:
+      cert-utils-operator.redhat-cop.io/generate-cert-info: "true"

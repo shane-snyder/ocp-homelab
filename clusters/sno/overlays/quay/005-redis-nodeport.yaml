@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: quay-registry-quay-redis-nodeport
+  namespace: quay-enterprise
+  labels:
+    quay-component: redis
+    quay-operator/quayregistry: quay-registry
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+      nodePort: 30379  # Assigned NodePort
+  selector:
+    quay-component: redis

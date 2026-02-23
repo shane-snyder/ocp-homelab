@@ -1,0 +1,332 @@
+applications:
+  # --- Gitops Configuration (sync-wave 3) ---
+  gitops-configuration:
+    annotations:
+      argocd.argoproj.io/sync-wave: "3"
+    source:
+      path: clusters/sno/overlays/gitops-configuration
+    destination:
+      namespace: openshift-gitops
+
+  # --- Storage (sync-wave 5) ---
+  lvms-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno/overlays/lvms-operator
+    destination:
+      namespace: openshift-storage
+
+  # --- Authentication (sync-wave 5) ---
+  oauth:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno/overlays/oauth
+    destination:
+      namespace: openshift-config
+
+  # --- Certificate Management (sync-wave 6) ---
+  cert-manager-configuration:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno/overlays/cert-manager
+    destination:
+      namespace: cert-manager
+
+  # --- Secrets (sync-wave 6) ---
+  external-secrets-configuration:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno/overlays/external-secrets
+    destination:
+      namespace: external-secrets
+
+  # --- MinIO Operator (sync-wave 5) ---
+  minio-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/minio/operator
+      extraSourceFields: |
+        helm:
+          releaseName: minio-operator
+          valueFiles:
+            - sno-values.yaml
+    destination:
+      namespace: minio-operator
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- MinIO Secrets (sync-wave 9, before tenants) ---
+  minio-secrets:
+    annotations:
+      argocd.argoproj.io/sync-wave: "9"
+    source:
+      path: clusters/sno/overlays/minio-secrets
+    destination:
+      namespace: opentelemetry
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- MinIO Tenant - Tempo/OSSM3 (sync-wave 10) ---
+  minio-tempo-ossm3:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/minio/tenant-6.0.4/tenant
+      extraSourceFields: |
+        helm:
+          releaseName: tenant-tempo-ossm3
+          valueFiles:
+            - tenants/tempo-ossm3/values-tempo-ossm3.yaml
+    destination:
+      namespace: opentelemetry
+
+  # --- Image Registry (sync-wave 6) ---
+  image-registry:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno/overlays/image-registry
+    destination:
+      namespace: openshift-image-registry
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: imageregistry.operator.openshift.io
+          kind: Config
+          jsonPointers:
+            - /spec/httpSecret
+
+  # --- Cost Management (sync-wave 6) ---
+  cost-management:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno/overlays/cost-management
+    destination:
+      namespace: costmanagement-metrics-operator
+
+  # --- ACS Instance (sync-wave 10) ---
+  acs-instance:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: clusters/sno/overlays/acs-instance
+    destination:
+      namespace: stackrox
+
+  # --- Quay (sync-wave 10) ---
+  quay:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: clusters/sno/overlays/quay
+    destination:
+      namespace: quay-enterprise
+
+  # --- ACM (sync-wave 5) ---
+  acm-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno/overlays/acm-operator
+    destination:
+      namespace: open-cluster-management
+
+  acm-instance:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/acm-instance
+    destination:
+      namespace: open-cluster-management
+
+  acm-observability:
+    annotations:
+      argocd.argoproj.io/sync-wave: "15"
+    source:
+      path: components/acm-observability
+    destination:
+      namespace: open-cluster-management
+
+  # --- Ansible Automation Platform (sync-wave 10) ---
+  ansible-automation-platform:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/aap-instance
+    destination:
+      namespace: ansible-automation-platform
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: automationcontroller.ansible.com
+          kind: AutomationController
+          jsonPointers:
+            - /spec/admin_password_secret
+
+  # --- Custom Metrics Autoscaler (sync-wave 5) ---
+  custom-metrics-autoscaler:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/custom-metrics-autoscaler-operator
+    destination:
+      namespace: openshift-keda
+
+  # --- Network Observability (sync-wave 5) ---
+  network-observability-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/network-observability-operator
+    destination:
+      namespace: openshift-netobserv-operator
+
+  network-observability-instance:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/network-observability-instance
+    destination:
+      namespace: netobserv
+
+  # --- Cluster Observability (sync-wave 5) ---
+  cluster-observability-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/cluster-observability-operator
+    destination:
+      namespace: openshift-cluster-observability-operator
+
+  # --- OpenShift Virtualization (sync-wave 5) ---
+  openshift-virtualization-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/openshift-virtualization-operator
+    destination:
+      namespace: openshift-cnv
+
+  # --- Power Monitoring (sync-wave 10) ---
+  power-monitoring:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/power-monitoring
+    destination:
+      namespace: openshift-power-monitoring
+
+  # --- Splunk (sync-wave 10) ---
+  splunk:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/splunk
+    destination:
+      namespace: splunk
+
+  # --- Tailscale Secrets (sync-wave 4, before operator) ---
+  tailscale-operator-secrets:
+    annotations:
+      argocd.argoproj.io/sync-wave: "4"
+    source:
+      path: clusters/sno/overlays/tailscale-operator
+    destination:
+      namespace: tailscale
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- Tailscale Operator (sync-wave 5) ---
+  tailscale-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/tailscale-operator
+      extraSourceFields: |
+        helm:
+          releaseName: tailscale-operator
+          valueFiles:
+            - sno-values.yaml
+    destination:
+      namespace: tailscale
+    syncOptions:
+      - CreateNamespace=true
+
+  tailscale-day2:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/tailscale-day2
+    destination:
+      namespace: tailscale
+
+  # --- HashiCorp Vault Addons (sync-wave 10) ---
+  hashicorp-vault-addons:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/hashicorp-vault-addons
+    destination:
+      namespace: vault
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- iDRAC Start/Stop (sync-wave 10) ---
+  idrac-start-stop:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/idrac-start-stop
+    destination:
+      namespace: idrac
+
+  # --- OADP Operator (sync-wave 5) ---
+  oadp-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/oadp-operator
+    destination:
+      namespace: openshift-adp
+
+  # --- Compliance Operator (sync-wave 5) ---
+  compliance-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/compliance-operator
+    destination:
+      namespace: openshift-compliance
+
+  compliance-configuration:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/compliance-configuration
+    destination:
+      namespace: openshift-compliance
+
+  # --- Tempo (sync-wave 5) ---
+  tempo-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/tempo-operator
+    destination:
+      namespace: openshift-tempo-operator
+
+  tempo-configuration:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/tempo-configuration
+    destination:
+      namespace: openshift-tempo-operator

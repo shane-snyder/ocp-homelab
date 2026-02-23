@@ -1,0 +1,14 @@
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: ocp
+spec:
+  statefulSet:
+    pod:
+      tailscaleInitContainer:
+        securityContext:
+          privileged: true
+      tailscaleContainer:
+        securityContext:
+          privileged: true
+

@@ -1,0 +1,19 @@
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  name: demo-backup
+  namespace: openshift-adp
+  labels:
+    velero.io/storage-location: oadp-backup
+  annotations:
+    velero.io/resource-timeout: 10m0s
+spec:
+  includedNamespaces:
+    - demo
+  storageLocation: oadp-backup
+  ttl: 720h0m0s
+  defaultVolumesToFsBackup: true   
+  snapshotVolumes: false            
+  itemOperationTimeout: 4h0m0s
+  hooks: {}                          
+

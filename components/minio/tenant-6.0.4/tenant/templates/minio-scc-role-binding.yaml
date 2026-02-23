@@ -1,0 +1,21 @@
+#Added by me to create rolebinding to tenant
+{{- with .Values.tenant }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  {{- if dig "serviceAccountName" "" . }}
+  name: {{ dig "serviceAccountName" "" . }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:anyuid
+subjects:
+- kind: ServiceAccount
+  {{- if dig "serviceAccountName" "" . }}
+  name: {{ dig "serviceAccountName" "" . }}
+  {{- end }}
+  {{- if dig "namespace" "" . }}
+  namespace: {{ dig "namespace" "" . }}
+  {{- end }}
+{{- end }}

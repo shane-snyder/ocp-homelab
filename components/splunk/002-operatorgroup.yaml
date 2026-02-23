@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    olm.providedAPIs: ClusterManager.v4.enterprise.splunk.com,ClusterMaster.v1.enterprise.splunk.com,ClusterMaster.v2.enterprise.splunk.com,ClusterMaster.v3.enterprise.splunk.com,IndexerCluster.v1.enterprise.splunk.com,IndexerCluster.v2.enterprise.splunk.com,IndexerCluster.v3.enterprise.splunk.com,IndexerCluster.v4.enterprise.splunk.com,LicenseManager.v4.enterprise.splunk.com,LicenseMaster.v1.enterprise.splunk.com,LicenseMaster.v2.enterprise.splunk.com,LicenseMaster.v3.enterprise.splunk.com,MonitoringConsole.v3.enterprise.splunk.com,MonitoringConsole.v4.enterprise.splunk.com,SearchHeadCluster.v1.enterprise.splunk.com,SearchHeadCluster.v2.enterprise.splunk.com,SearchHeadCluster.v3.enterprise.splunk.com,SearchHeadCluster.v4.enterprise.splunk.com,Standalone.v1.enterprise.splunk.com,Standalone.v2.enterprise.splunk.com,Standalone.v3.enterprise.splunk.com,Standalone.v4.enterprise.splunk.com
+  name: splunk
+  namespace: splunk
+spec:
+  upgradeStrategy: Default

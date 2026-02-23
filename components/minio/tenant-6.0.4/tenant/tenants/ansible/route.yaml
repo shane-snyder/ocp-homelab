@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+  labels:
+    v1.min.io/tenant: minio-ansible
+  name: ansible
+  namespace: ansible-automation-platform
+spec:
+  host: minio-ansible.apps.sno.shanehomelab.com
+  port:
+    targetPort: http-minio
+  to:
+    kind: Service
+    name: ansible
+    weight: 100
+  wildcardPolicy: None

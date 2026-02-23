@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonAnnotations:
+  argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+
+resources:
+  - ../../../../components/quay
+  - 000-quay-subscription.yaml
+  - 002-gitops-role-binding.yaml
+  - 003-config-bundle-secret-external-secret.yaml
+  - 004-quayregistry.yaml
+  - 005-minio-nodeport.yaml
+  - 005-postgres-nodeport.yaml
+  - 005-redis-nodeport.yaml
+
+patchesStrategicMerge:
+  # Add any patches specific to SNO here, if needed
+

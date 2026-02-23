@@ -1,0 +1,33 @@
+kind: TempoStack
+apiVersion: tempo.grafana.com/v1alpha1
+metadata:
+  name: ossm3
+  namespace: opentelemetry
+spec:
+  resources:
+    total:
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+  storage:
+    secret:
+      name: ossm3-storage-secret
+      type: s3
+  storageSize: 1Gi
+  tenants:
+    mode: openshift
+    authentication:
+      - tenantName: istio-system-dev
+        tenantId: "1610b0c3-c509-4592-a256-a1871353dbfa"
+  template:
+    gateway:
+      enabled: true
+    queryFrontend:
+      component:
+        replicas: 1
+        resources:
+          limits:
+            cpu: '2'
+            memory: 2Gi
+      jaegerQuery:
+        enabled: true

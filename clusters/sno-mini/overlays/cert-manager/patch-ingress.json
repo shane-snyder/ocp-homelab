@@ -1,0 +1,23 @@
+[
+    {
+      "op": "replace",
+      "path": "/metadata/name",
+      "value": "sno-mini-ingress-cert"
+    },
+    {
+      "op": "replace",
+      "path": "/spec/commonName",
+      "value": "*.apps.sno-mini.shanehomelab.com"
+    },
+    {
+      "op": "replace",
+      "path": "/spec/dnsNames",
+      "value": ["*.apps.sno-mini.shanehomelab.com"]
+    },
+    {
+      "op": "replace",
+      "path": "/spec/secretName",
+      "value": "ingress-ca-sno-mini"
+    }
+  ]
+  

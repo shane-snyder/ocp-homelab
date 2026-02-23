@@ -1,0 +1,12 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: openshift-config
+
+
+resources:
+  - 001-gitops-role-binding.yaml
+  - 003-oauth_sno.yaml
+  - 004-shane-cluster-admin.yaml
+  - 005-idrac-user-clusterrolebinding.yaml

@@ -1,0 +1,16 @@
+apiVersion: kepler.system.sustainable.computing.io/v1alpha1
+kind: Kepler
+metadata:
+  name: kepler
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  exporter:
+    deployment:
+      port: 9103 
+      nodeSelector:
+        kubernetes.io/os: linux
+    redfish:
+      secretRef: redfish-secret
+      probeInterval: 1m0s
+      skipSSLVerify: true

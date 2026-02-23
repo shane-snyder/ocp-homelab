@@ -1,0 +1,15 @@
+apiVersion: enterprise.splunk.com/v3
+kind: Standalone
+metadata:
+  name: splunk-s1
+  namespace: splunk
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  varVolumeStorageConfig:
+    storageClassName: lvms-dell
+    storageCapacity: 10Gi
+  etcVolumeStorageConfig:
+    storageClassName: lvms-dell
+    storageCapacity: 10Gi
+  serviceAccount: splunk

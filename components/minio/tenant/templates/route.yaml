@@ -1,0 +1,29 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: minio
+  namespace: {{ .Values.tenant.namespace }}
+spec:
+  host: {{ .Values.tenant.apiHost | default (printf "minio-%s.apps.%s.shanehomelab.com" .Values.tenant.namespace .Values.tenant.cluster) }}
+  port:
+    targetPort: http-minio
+  to:
+    kind: Service
+    name: minio
+    weight: 100
+  wildcardPolicy: None
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ .Values.tenant.name }}-console
+  namespace: {{ .Values.tenant.namespace }}
+spec:
+  host: {{ .Values.tenant.consoleHost | default (printf "%s-console-%s.apps.%s.shanehomelab.com" .Values.tenant.name .Values.tenant.namespace .Values.tenant.cluster) }}
+  to:
+    kind: Service
+    name: {{ .Values.tenant.name }}-console
+    weight: 100
+  port:
+    targetPort: http-console
+  wildcardPolicy: None

@@ -1,0 +1,23 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+    argocd.argoproj.io/sync-wave: "6"
+  labels:
+    app.kubernetes.io/component: standalone
+    app.kubernetes.io/instance: splunk-splunk-s1-standalone
+    app.kubernetes.io/managed-by: splunk-operator
+    app.kubernetes.io/name: standalone
+    app.kubernetes.io/part-of: splunk-splunk-s1-standalone
+  name: splunk-splunk-s1-standalone-service
+  namespace: splunk
+spec:
+  host: splunk-splunk-s1-standalone-service-splunk.apps.sno.shanehomelab.com
+  port:
+    targetPort: http-splunkweb
+  to:
+    kind: Service
+    name: splunk-splunk-s1-standalone-service
+    weight: 100
+  wildcardPolicy: None

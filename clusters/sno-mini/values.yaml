@@ -1,0 +1,200 @@
+applications:
+  # --- Gitops Configuration (sync-wave 3) ---
+  gitops-configuration:
+    annotations:
+      argocd.argoproj.io/sync-wave: "3"
+    source:
+      path: clusters/sno-mini/overlays/gitops-configuration
+    destination:
+      namespace: openshift-gitops
+
+  # --- Storage (sync-wave 5) ---
+  lvms-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno-mini/overlays/lvms-operator
+    destination:
+      namespace: openshift-storage
+
+  # --- Authentication (sync-wave 5) ---
+  oauth:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno-mini/overlays/oauth
+    destination:
+      namespace: openshift-config
+
+  # --- Certificate Management (sync-wave 6) ---
+  cert-manager-configuration:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno-mini/overlays/cert-manager
+    destination:
+      namespace: cert-manager
+
+  # --- Secrets (sync-wave 6) ---
+  external-secrets-configuration:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno-mini/overlays/external-secrets
+    destination:
+      namespace: external-secrets
+
+  # --- MinIO Operator (sync-wave 5) ---
+  minio-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/minio/operator
+      extraSourceFields: |
+        helm:
+          releaseName: minio-operator
+          valueFiles:
+            - sno-mini-values.yaml
+    destination:
+      namespace: minio-operator
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- MinIO Secrets (sync-wave 9, before tenants) ---
+  minio-secrets:
+    annotations:
+      argocd.argoproj.io/sync-wave: "9"
+    source:
+      path: clusters/sno-mini/overlays/minio-secrets
+    destination:
+      namespace: backup
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- MinIO Tenant - Backup (sync-wave 10) ---
+  minio-backup:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/minio/tenant-6.0.4/tenant
+      extraSourceFields: |
+        helm:
+          releaseName: tenant-backup
+          valueFiles:
+            - tenants/quay/values-quay-migration.yaml
+    destination:
+      namespace: backup
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- Image Registry (sync-wave 6) ---
+  image-registry:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno-mini/overlays/image-registry
+    destination:
+      namespace: openshift-image-registry
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: imageregistry.operator.openshift.io
+          kind: Config
+          jsonPointers:
+            - /spec/httpSecret
+
+  # --- Cost Management (sync-wave 6) ---
+  cost-management:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno-mini/overlays/cost-management
+    destination:
+      namespace: costmanagement-metrics-operator
+
+  # --- ACS Instance (sync-wave 10) ---
+  acs-instance:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: clusters/sno-mini/overlays/acs-instance
+    destination:
+      namespace: stackrox
+
+  # --- Quay (sync-wave 10) ---
+  quay:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: clusters/sno-mini/overlays/quay
+    destination:
+      namespace: quay-enterprise
+
+  # --- Tailscale Secrets (sync-wave 4, before operator) ---
+  tailscale-operator-secrets:
+    annotations:
+      argocd.argoproj.io/sync-wave: "4"
+    source:
+      path: clusters/sno-mini/overlays/tailscale-operator
+    destination:
+      namespace: tailscale
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- Tailscale Operator (sync-wave 5) ---
+  tailscale-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/tailscale-operator/1.92.5
+      extraSourceFields: |
+        helm:
+          releaseName: tailscale-operator
+          valueFiles:
+            - sno-mini-values.yaml
+    destination:
+      namespace: tailscale
+    syncOptions:
+      - CreateNamespace=true
+
+  tailscale-day2:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/tailscale-day2
+    destination:
+      namespace: tailscale
+
+  # --- HashiCorp Vault (sync-wave 5) ---
+  hashicorp-vault:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/hashicorp-vault
+      extraSourceFields: |
+        helm:
+          releaseName: hashicorp-vault-operator
+          valueFiles:
+            - values.yaml
+            - values.openshift.yaml
+    destination:
+      namespace: vault
+    syncOptions:
+      - CreateNamespace=true
+    extraFields: |
+      ignoreDifferences:
+        - group: admissionregistration.k8s.io
+          kind: MutatingWebhookConfiguration
+          jsonPointers:
+            - /webhooks/0/clientConfig/caBundle
+
+  hashicorp-vault-addons:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/hashicorp-vault-addons
+    destination:
+      namespace: vault
+    syncOptions:
+      - CreateNamespace=true
