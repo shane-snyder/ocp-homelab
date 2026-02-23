@@ -160,7 +160,7 @@ applications:
     source:
       path: components/acm-policies-argocd-agent
     destination:
-      namespace: acm-policies
+      namespace: open-cluster-management-global-set
 
   # --- Ansible Automation Platform (sync-wave 10) ---
   ansible-automation-platform:

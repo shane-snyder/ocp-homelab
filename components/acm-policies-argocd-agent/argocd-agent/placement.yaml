@@ -2,7 +2,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
   name: argocd-agent
-  namespace: acm-policies
+  namespace: open-cluster-management-global-set
 spec:
   clusterSets:
     - global

@@ -7,7 +7,7 @@ placementBindingDefaults:
 policyDefaults:
   complianceType: "mustonlyhave"
   consolidateManifests: false
-  namespace: acm-policies
+  namespace: open-cluster-management-global-set
   remediationAction: enforce
 policies:
   - name: argocd-agent-registration

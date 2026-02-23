@@ -5,7 +5,7 @@ metadata:
 placementBindingDefaults:
   name: argocd-agent
 policyDefaults:
-  namespace: acm-policies
+  namespace: open-cluster-management-global-set
   remediationAction: enforce
   complianceType: "mustonlyhave"
 policies:

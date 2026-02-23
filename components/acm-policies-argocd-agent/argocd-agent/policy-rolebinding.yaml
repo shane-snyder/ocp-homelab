@@ -15,7 +15,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: argocd-agent-policy
-    namespace: acm-policies
+    namespace: open-cluster-management-global-set
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -33,4 +33,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: argocd-agent-policy
-    namespace: acm-policies
+    namespace: open-cluster-management-global-set
