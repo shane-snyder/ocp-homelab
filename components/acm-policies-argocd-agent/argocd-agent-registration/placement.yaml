@@ -4,7 +4,7 @@ metadata:
   name: argocd-agent-registration
 spec:
   clusterSets:
-    - default
+    - global
   numberOfClusters: 1
   predicates:
     - requiredClusterSelector:

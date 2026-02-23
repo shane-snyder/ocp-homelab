@@ -5,7 +5,7 @@ metadata:
   namespace: acm-policies
 spec:
   clusterSets:
-    - default
+    - global
   predicates:
     - requiredClusterSelector:
         labelSelector:
