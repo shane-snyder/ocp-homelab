@@ -154,6 +154,14 @@ applications:
     destination:
       namespace: open-cluster-management
 
+  acm-gitops-cluster:
+    annotations:
+      argocd.argoproj.io/sync-wave: "15"
+    source:
+      path: components/acm-gitops-cluster
+    destination:
+      namespace: openshift-gitops
+
   # --- Ansible Automation Platform (sync-wave 10) ---
   ansible-automation-platform:
     annotations:
