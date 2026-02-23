@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: ${INFRA_GITOPS_REPO}
     targetRevision: HEAD
-    path: clusters/${CLUSTER_NAME}
+    path: clusters/${CLUSTER_NAME}-hub
   syncPolicy:
     automated:
       prune: true
