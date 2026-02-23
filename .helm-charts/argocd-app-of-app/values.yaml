@@ -11,13 +11,13 @@ default:
     autoSyncPrune: false
     project: cluster-config
     labels:
-      app-source: gitops-homelab
+      app-source: ocp-homelab
       repo: cluster-config
     destination:
       namespace: openshift-gitops
       server: https://kubernetes.default.svc
     source:
-      repoURL: https://github.com/shane-snyder/gitops-homelab.git
+      repoURL: https://github.com/shane-snyder/ocp-homelab.git
       targetRevision: HEAD
     syncOptions:
       - ApplyOutOfSyncOnly=true
