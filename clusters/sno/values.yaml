@@ -154,13 +154,13 @@ applications:
     destination:
       namespace: open-cluster-management
 
-  acm-gitops-cluster:
+  acm-policies-argocd-agent:
     annotations:
       argocd.argoproj.io/sync-wave: "15"
     source:
-      path: components/acm-gitops-cluster
+      path: components/acm-policies-argocd-agent
     destination:
-      namespace: openshift-gitops
+      namespace: acm-policies
 
   # --- Ansible Automation Platform (sync-wave 10) ---
   ansible-automation-platform:

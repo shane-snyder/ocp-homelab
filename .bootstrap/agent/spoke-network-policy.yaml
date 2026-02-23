@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: argocd-agent-redis
+  namespace: openshift-gitops
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: openshift-gitops-redis
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 6379
+      from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: argocd-agent-agent
+  policyTypes:
+    - Ingress
