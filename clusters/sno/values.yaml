@@ -154,6 +154,14 @@ applications:
     destination:
       namespace: open-cluster-management
 
+  argocd-hub:
+    annotations:
+      argocd.argoproj.io/sync-wave: "3"
+    source:
+      path: components/argocd-hub/base
+    destination:
+      namespace: argocd
+
   acm-policies-argocd-agent:
     annotations:
       argocd.argoproj.io/sync-wave: "15"

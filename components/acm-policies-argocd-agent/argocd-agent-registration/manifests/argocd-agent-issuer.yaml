@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: argocd-agent-selfsigned
-  namespace: openshift-gitops
+  namespace: argocd
 spec:
   selfSigned: {}
 ---
@@ -11,7 +11,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: argocd-agent-ca
-  namespace: openshift-gitops
+  namespace: argocd
 spec:
   isCA: true
   commonName: argocd-agent-ca
@@ -25,7 +25,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: argocd-agent-ca
-  namespace: openshift-gitops
+  namespace: argocd
 spec:
   ca:
     secretName: argocd-agent-ca
@@ -34,17 +34,17 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: argocd-agent-resource-proxy-tls
-  namespace: openshift-gitops
+  namespace: argocd
 spec:
   secretName: argocd-agent-resource-proxy-tls
   issuerRef:
     name: argocd-agent-ca
     kind: Issuer
-  commonName: openshift-gitops-agent-principal-resource-proxy
+  commonName: argocd-agent-principal-resource-proxy
   duration: 8760h
   renewBefore: 720h
   dnsNames:
-    - openshift-gitops-agent-principal-resource-proxy.openshift-gitops.svc.cluster.local
-    - openshift-gitops-agent-principal-resource-proxy.openshift-gitops.svc
+    - argocd-agent-principal-resource-proxy.argocd.svc.cluster.local
+    - argocd-agent-principal-resource-proxy.argocd.svc
   usages:
     - server auth

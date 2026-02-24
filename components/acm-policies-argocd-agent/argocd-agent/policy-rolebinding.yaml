@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: argocd-agent-policy
     app.kubernetes.io/part-of: argocd-agent
   name: argocd-agent-policy
-  namespace: openshift-gitops
+  namespace: argocd
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

@@ -17,7 +17,7 @@ object-templates-raw: |
       kind: Certificate
       metadata:
         name: argocd-agent-{{ $agent_name }}
-        namespace: openshift-gitops
+        namespace: argocd
       spec:
         secretName: argocd-agent-{{ $agent_name }}
         issuerRef:
@@ -38,7 +38,7 @@ object-templates-raw: |
       kind: Certificate
       metadata:
         name: argocd-principal-{{ $agent_name }}
-        namespace: openshift-gitops
+        namespace: argocd
       spec:
         secretName: argocd-principal-{{ $agent_name }}
         issuerRef:
@@ -57,7 +57,7 @@ object-templates-raw: |
       kind: AppProject
       metadata:
         name: argocd-agent-{{ $agent_name }}
-        namespace: openshift-gitops
+        namespace: argocd
       spec:
         clusterResourceWhitelist:
         - group: '*'

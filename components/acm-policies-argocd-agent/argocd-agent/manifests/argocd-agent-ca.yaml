@@ -4,4 +4,4 @@ metadata:
   name: argocd-agent-ca
   namespace: openshift-gitops
 data:
-  tls.crt: '{{hub (fromSecret "openshift-gitops" "argocd-agent-ca" "tls.crt") hub}}'
+  tls.crt: '{{hub (fromSecret "argocd" "argocd-agent-ca" "tls.crt") hub}}'

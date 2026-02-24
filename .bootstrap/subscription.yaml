@@ -30,4 +30,4 @@ spec:
   config:
     env:
       - name: ARGOCD_CLUSTER_CONFIG_NAMESPACES
-        value: 'openshift-gitops'
+        value: 'argocd,openshift-gitops'

@@ -1,0 +1,133 @@
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  kustomizeBuildOptions: --enable-alpha-plugins --enable-helm --load-restrictor LoadRestrictionsNone
+  argoCDAgent:
+    principal:
+      enabled: true
+      auth: "mtls:CN=([^,]+)"
+      logLevel: "info"
+      namespace:
+        allowedNamespaces:
+          - "argocd-agent-*"
+      tls:
+        insecureGenerate: true
+      jwt:
+        insecureGenerate: true
+  sourceNamespaces:
+    - "argocd-agent-*"
+  controller:
+    enabled: false
+  applicationSet:
+    enabled: true
+    extraCommandArgs:
+      - "--applicationset-namespaces"
+      - "argocd-agent-*"
+      - "--enable-progressive-syncs"
+      - "--enable-scm-providers=false"
+    resources:
+      limits:
+        cpu: "2"
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    webhookServer:
+      ingress:
+        enabled: false
+      route:
+        enabled: false
+  server:
+    autoscale:
+      enabled: false
+    grpc:
+      ingress:
+        enabled: false
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 125m
+        memory: 128Mi
+    route:
+      enabled: true
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: reencrypt
+    service:
+      type: ""
+  grafana:
+    enabled: false
+  monitoring:
+    enabled: false
+  notifications:
+    enabled: false
+  prometheus:
+    enabled: false
+    ingress:
+      enabled: false
+    route:
+      enabled: false
+  sso:
+    dex:
+      openShiftOAuth: true
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 250m
+          memory: 128Mi
+    provider: dex
+  rbac:
+    defaultPolicy: ""
+    policy: |
+      g, system:cluster-admins, role:admin
+      g, cluster-admins, role:admin
+    scopes: '[groups]'
+  repo:
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    env:
+      - name: KUSTOMIZE_PLUGIN_HOME
+        value: /etc/kustomize/plugin
+    initContainers:
+      - args:
+          - -c
+          - cp /policy-generator/PolicyGenerator-not-fips-compliant /policy-generator-tmp/PolicyGenerator
+        command:
+          - /bin/bash
+        image: registry.redhat.io/rhacm2/multicluster-operators-subscription-rhel9:v2.15
+        name: policy-generator-install
+        volumeMounts:
+          - mountPath: /policy-generator-tmp
+            name: policy-generator
+    volumeMounts:
+      - mountPath: /etc/kustomize/plugin/policy.open-cluster-management.io/v1/policygenerator
+        name: policy-generator
+    volumes:
+      - emptyDir: {}
+        name: policy-generator
+  redis:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 250m
+        memory: 128Mi
+  ha:
+    enabled: false
+  tls:
+    ca: {}
