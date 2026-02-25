@@ -7,3 +7,4 @@ namespace: external-secrets
 resources:
   - subscription.yaml
   - namespace.yaml
+  - operator-group.yaml
