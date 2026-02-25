@@ -7,3 +7,4 @@ resources:
   - namespace.yaml
   - argocd.yaml
   - appset-in-any-namespace-clusterrole.yaml
+  - acm-policy-rolebinding.yaml
