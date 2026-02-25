@@ -3,5 +3,3 @@ kind: Kustomization
 
 resources:
   - ../../../../components/gitops-configuration
-  - repo-external-secret.yaml
-  - repo-gitops-catalog-external-secret.yaml
