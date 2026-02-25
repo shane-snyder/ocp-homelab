@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: argocd-agent-client-tls
-  namespace: openshift-gitops
+  namespace: argocd-agent
 type: kubernetes.io/tls
 data:
   ca.crt: '{{hub (fromSecret "argocd" (printf "argocd-agent-%s" (index .ManagedClusterLabels "argocd-agent")) "ca.crt") hub}}'

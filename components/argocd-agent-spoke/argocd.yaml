@@ -1,39 +1,11 @@
 apiVersion: argoproj.io/v1beta1
 kind: ArgoCD
 metadata:
-  finalizers:
-    - argoproj.io/finalizer
-  name: openshift-gitops
-  namespace: openshift-gitops
+  name: argocd
+  namespace: argocd-agent
 spec:
-  applicationInstanceLabelKey: argocd.argoproj.io/application
-  applicationSet:
-    resources:
-      limits:
-        cpu: "2"
-        memory: 1Gi
-      requests:
-        cpu: 250m
-        memory: 512Mi
-    webhookServer:
-      ingress:
-        enabled: false
-      route:
-        enabled: false
-  argoCDAgent:
-    principal:
-      enabled: true
-      auth: "mtls:CN=([^,]+)"
-      logLevel: "info"
-      namespace:
-        allowedNamespaces:
-          - "*"
-      tls:
-        insecureGenerate: true
-      jwt:
-        insecureGenerate: true
+  kustomizeBuildOptions: --enable-alpha-plugins --enable-helm --load-restrictor LoadRestrictionsNone
   controller:
-    processors: {}
     resources:
       limits:
         cpu: "4"
@@ -41,47 +13,6 @@ spec:
       requests:
         cpu: 250m
         memory: 1Gi
-    sharding: {}
-  grafana:
-    enabled: false
-    ingress:
-      enabled: false
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 250m
-        memory: 128Mi
-    route:
-      enabled: false
-  ha:
-    enabled: false
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 250m
-        memory: 128Mi
-  initialSSHKnownHosts: {}
-  kustomizeBuildOptions: --enable-alpha-plugins --enable-helm --load-restrictor LoadRestrictionsNone
-  monitoring:
-    enabled: false
-  notifications:
-    enabled: true
-  prometheus:
-    enabled: false
-    ingress:
-      enabled: false
-    route:
-      enabled: false
-  rbac:
-    defaultPolicy: ""
-    policy: |
-      g, system:cluster-admins, role:admin
-      g, cluster-admins, role:admin
-    scopes: '[groups]'
   redis:
     resources:
       limits:
@@ -118,14 +49,9 @@ spec:
     volumes:
       - emptyDir: {}
         name: policy-generator
-  resourceExclusions: |
-    - apiGroups:
-      - tekton.dev
-      clusters:
-      - '*'
-      kinds:
-      - TaskRun
-      - PipelineRun
+  server:
+    enabled: false
+  resourceTrackingMethod: annotation
   resourceHealthChecks:
     - group: operators.coreos.com
       kind: Subscription
@@ -198,42 +124,11 @@ spec:
         end
         hs.status = "Progressing"
         hs.message = "Waiting for InstallPlan to complete"
-  resourceTrackingMethod: annotation
-  server:
-    autoscale:
-      enabled: false
-    grpc:
-      ingress:
-        enabled: false
-    host: openshift-gitops-server-openshift-gitops.apps.${CLUSTER_NAME}.${CLUSTER_BASE_DOMAIN}
-    ingress:
-      enabled: false
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 125m
-        memory: 128Mi
-    route:
-      enabled: true
-      tls:
-        insecureEdgeTerminationPolicy: Redirect
-        termination: reencrypt
-    service:
-      type: ""
-  sourceNamespaces:
-    - "argocd-agent-sno-mini"
-  sso:
-    dex:
-      openShiftOAuth: true
-      resources:
-        limits:
-          cpu: 500m
-          memory: 256Mi
-        requests:
-          cpu: 250m
-          memory: 256Mi
-    provider: dex
-  tls:
-    ca: {}
+  resourceExclusions: |
+    - apiGroups:
+      - tekton.dev
+      clusters:
+      - '*'
+      kinds:
+      - TaskRun
+      - PipelineRun

@@ -6,14 +6,6 @@ namespace: open-cluster-management-global-set
 resources:
   - namespace.yaml
   - managedclustersetbinding.yaml
+  - gitops-subscription
   - argocd-agent-registration
   - argocd-agent
-
-patches:
-  - target:
-      kind: RoleBinding
-      name: argocd-agent-policy
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: openshift-gitops
