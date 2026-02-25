@@ -8,5 +8,6 @@ resources:
   - argocd.yaml
   - principal-cert.yaml
   - repo-external-secret.yaml
+  - root-application-sno-mini.yaml
   - appset-in-any-namespace-clusterrole.yaml
   - acm-policy-rolebinding.yaml
