@@ -18,7 +18,7 @@ spec:
   sourceNamespaces:
     - "argocd-agent-*"
   controller:
-    enabled: true
+    enabled: false
   applicationSet:
     enabled: true
     extraCommandArgs:
