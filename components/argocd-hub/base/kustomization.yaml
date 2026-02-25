@@ -6,5 +6,6 @@ namespace: argocd
 resources:
   - namespace.yaml
   - argocd.yaml
+  - principal-cert.yaml
   - appset-in-any-namespace-clusterrole.yaml
   - acm-policy-rolebinding.yaml

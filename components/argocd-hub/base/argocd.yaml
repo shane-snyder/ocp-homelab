@@ -13,8 +13,6 @@ spec:
       namespace:
         allowedNamespaces:
           - "argocd-agent-*"
-      tls:
-        insecureGenerate: true
       jwt:
         insecureGenerate: true
   sourceNamespaces:
