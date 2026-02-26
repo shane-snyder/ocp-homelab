@@ -8,6 +8,7 @@ resources:
   - argocd.yaml
   - principal-cert.yaml
   - repo-external-secret.yaml
+  - root-application-sno.yaml
   - root-application-sno-mini.yaml
   - appset-in-any-namespace-clusterrole.yaml
   - agent-principal-rbac.yaml

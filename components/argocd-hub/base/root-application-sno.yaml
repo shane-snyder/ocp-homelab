@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sno-agent-apps
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd-agent-sno
+    server: https://kubernetes.default.svc
+  project: argocd-agent-sno
+  source:
+    repoURL: https://github.com/shane-snyder/ocp-homelab.git
+    targetRevision: HEAD
+    path: clusters/sno
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true

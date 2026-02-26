@@ -40,7 +40,7 @@ applications:
     source:
       path: clusters/sno/overlays/gitops-configuration
     destination:
-      namespace: openshift-gitops
+      namespace: argocd
 
   # --- Storage (sync-wave 5) ---
   lvms-operator:
