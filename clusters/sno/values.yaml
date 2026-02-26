@@ -204,6 +204,15 @@ applications:
     destination:
       namespace: quay-enterprise
 
+  # --- ACM Policies - ArgoCD Agent (sync-wave 8) ---
+  acm-policies-argocd-agent:
+    annotations:
+      argocd.argoproj.io/sync-wave: "8"
+    source:
+      path: components/acm-policies-argocd-agent
+    destination:
+      namespace: open-cluster-management-global-set
+
   # --- ACM (sync-wave 5) ---
   acm-operator:
     annotations:
