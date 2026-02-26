@@ -46,14 +46,21 @@ spec:
     - configOverrides: {}
       enabled: true
       name: console-mce
-    - enabled: false
+    - configOverrides: {}
+      enabled: false
       name: image-based-install-operator
     - configOverrides: {}
-      enabled: false
+      enabled: true
       name: cluster-api-preview
     - configOverrides: {}
-      enabled: false
+      enabled: true
       name: cluster-api-provider-aws-preview
+    - configOverrides: {}	
+      enabled: false	
+      name: cluster-api-provider-metal3	
+    - configOverrides: {}	
+      enabled: false	
+      name: cluster-api-provider-openshift-assisted
   targetNamespace: multicluster-engine
   tolerations:
   - effect: NoSchedule
