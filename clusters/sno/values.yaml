@@ -255,23 +255,6 @@ applications:
     destination:
       namespace: openshift-keda
 
-  # --- Network Observability (sync-wave 5) ---
-  network-observability-operator:
-    annotations:
-      argocd.argoproj.io/sync-wave: "5"
-    source:
-      path: components/network-observability-operator
-    destination:
-      namespace: openshift-netobserv-operator
-
-  network-observability-instance:
-    annotations:
-      argocd.argoproj.io/sync-wave: "10"
-    source:
-      path: components/network-observability-instance
-    destination:
-      namespace: netobserv
-
   # --- Cluster Observability (sync-wave 5) ---
   cluster-observability-operator:
     annotations:
