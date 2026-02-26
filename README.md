@@ -1,235 +1,280 @@
 # GitOps Homelab
 
-OpenShift GitOps repository for managing homelab clusters following the [Red Hat CoP GitOps pattern](https://github.com/redhat-cop/gitops-standards-repo-template).
+OpenShift GitOps repository for managing homelab clusters using the ArgoCD Agent architecture, following the [Red Hat CoP GitOps pattern](https://github.com/redhat-cop/gitops-standards-repo-template).
 
 ## Repository Structure
 
 ```
 ocp-homelab/
-├── .bootstrap/              # One-time bootstrap manifests (applied manually)
-│   ├── subscription.yaml    # OpenShift GitOps operator install
-│   ├── argocd.yaml          # ArgoCD instance configuration (standalone)
-│   ├── cluster-rolebinding.yaml
-│   ├── root-application.yaml        # Root app (standalone mode)
+├── .bootstrap/                 # One-time bootstrap manifests (applied manually)
+│   ├── subscription.yaml       # OpenShift GitOps operator Subscription
 │   └── agent/
-│       ├── hub-argocd.yaml          # Hub ArgoCD instance (with Principal)
-│       ├── spoke-argocd.yaml        # Spoke ArgoCD instance (lightweight, no server)
-│       ├── spoke-network-policy.yaml # NetworkPolicy for Agent ↔ Redis
-│       └── spoke-root-application.yaml # Root app for spoke cluster
-├── .helm-charts/            # Helm charts used by Kustomize
-│   └── argocd-app-of-app/   # Renders Application + AppProject CRs from values
-├── clusters/                # Per-cluster entry points
-│   ├── sno/                 # SNO cluster apps
-│   └── sno-mini/            # SNO-Mini cluster apps
-├── components/              # Reusable, environment-agnostic building blocks
-│   └── acm-policies-argocd-agent/  # ACM policies for ArgoCD Agent PKI
-├── groups/                  # Shared configurations applied to sets of clusters
-│   └── all/                 # Applied to every cluster
-└── .github/workflows/       # CI/CD pipeline
+│       ├── hub-argocd.yaml             # Hub ArgoCD instance with Principal
+│       ├── spoke-argocd.yaml           # Spoke ArgoCD instance (no server)
+│       ├── spoke-network-policy.yaml   # NetworkPolicy for Agent ↔ Redis
+│       └── spoke-root-application.yaml # Root app template for spoke clusters
+├── .helm-charts/
+│   └── argocd-app-of-app/      # Helm chart that renders Application + AppProject CRs
+├── clusters/                   # Per-cluster app definitions
+│   ├── sno/                    # Hub cluster (argocd-agent-sno)
+│   │   ├── kustomization.yaml
+│   │   ├── values.yaml
+│   │   └── overlays/           # Cluster-specific Kustomize patches
+│   └── sno-mini/               # Spoke cluster (argocd-agent-sno-mini)
+│       ├── kustomization.yaml
+│       ├── values.yaml
+│       └── overlays/
+├── components/                 # Reusable, environment-agnostic manifests
+│   ├── argocd-hub/             # Hub ArgoCD instance, RBAC, root apps
+│   ├── argocd-agent-spoke/     # Spoke ArgoCD instance
+│   ├── acm-policies-argocd-agent/  # ACM policies for agent PKI automation
+│   ├── cert-manager-operator/
+│   ├── external-secrets-operator/
+│   └── ...                     # One directory per application/operator
+├── groups/                     # Shared app definitions applied to multiple clusters
+│   └── all/
+└── .github/workflows/          # CI/CD pipeline
 ```
+
+## Architecture
+
+All clusters use the ArgoCD Agent model (GA in OpenShift GitOps 1.19+). The hub
+runs an ArgoCD Principal with no application controller — all reconciliation
+happens through agents, including on the hub cluster itself.
+
+```
+┌────────────────────────────────────────┐      ┌──────────────────────────────┐
+│            sno (hub)                   │      │       sno-mini (spoke)       │
+│                                        │      │                              │
+│  ┌──────────────────────────────────┐  │      │  ┌────────────────────────┐  │
+│  │ ArgoCD Principal (argocd)        │  │      │  │ ArgoCD (argocd)        │  │
+│  │  - No app controller            │  │      │  │  - App controller      │  │
+│  │  - Server / UI                  │  │      │  │  - No server           │  │
+│  │  - ApplicationSet controller    │◄─┼──────┼──│ Agent (autonomous)     │  │
+│  │  - Redis proxy for agents       │  │      │  └────────────────────────┘  │
+│  └──────────────────────────────────┘  │      │                              │
+│                                        │      │  Agent namespace:            │
+│  ┌──────────────────────────────────┐  │      │    argocd-agent-sno-mini     │
+│  │ Local Agent (argocd-agent-sno)   │  │      │                              │
+│  │  - App controller               │  │      │  Apps: clusters/sno-mini/    │
+│  │  - Reconciles hub's own apps    │  │      │    values.yaml               │
+│  └──────────────────────────────────┘  │      │                              │
+│                                        │      │  mTLS certs copied via       │
+│  ┌──────────────────────────────────┐  │      │    ACM policy                │
+│  │ ACM + cert-manager               │  │      │                              │
+│  │  - CA + per-agent TLS certs     │──┼─────>│                              │
+│  │  - ACM policies distribute PKI  │  │      │                              │
+│  └──────────────────────────────────┘  │      │                              │
+└────────────────────────────────────────┘      └──────────────────────────────┘
+```
+
+**Key points:**
+- The hub's application controller is **disabled** — a local agent in `argocd-agent-sno` reconciles the hub's own apps
+- Spoke agents connect to the hub Principal over mTLS (no cluster credentials stored on the hub)
+- Each cluster manages its own apps locally via an app-of-apps pattern
+- The hub provides centralized visibility through the ArgoCD UI
+- PKI is fully automated via cert-manager + ACM policies
 
 ## How It Works
 
-1. A single **root Application** (`root-applications`) points at `clusters/<cluster_name>/`
-2. Each cluster's `kustomization.yaml` includes shared groups and renders cluster-specific apps
-3. The `argocd-app-of-app` Helm chart generates `Application` and `AppProject` CRs from `values.yaml`
-4. **Components** hold base manifests; **cluster overlays** add environment-specific patches
-
-## Deployment Modes
-
-This repository supports two deployment modes:
-
-### Standalone Mode (ArgoCD per cluster)
-
-Each cluster runs its own ArgoCD instance and manages itself. This is the default.
-
-```
-┌─────────────┐    ┌─────────────────┐
-│     sno      │    │    sno-mini      │
-│  ┌────────┐  │    │  ┌────────┐     │
-│  │ ArgoCD │  │    │  │ ArgoCD │     │
-│  └────────┘  │    │  └────────┘     │
-│   manages    │    │   manages       │
-│   itself     │    │   itself        │
-└─────────────┘    └─────────────────┘
-```
-
-### Agent Mode (ArgoCD Agent — Autonomous)
-
-Uses the ArgoCD Agent (GA in OpenShift GitOps 1.19+) in **autonomous mode**.
-Each cluster remains the source of truth for its own applications. The Agent
-running on the spoke syncs app specs and status back to the hub for centralized
-visibility. Communication uses mTLS — no cluster credentials stored on the hub.
-
-mTLS certificates are managed automatically by **cert-manager** and distributed
-to spoke clusters via **ACM policies** — no manual `argocd-agentctl` usage required.
-
-```
-┌──────────────────────────────────┐    ┌──────────────────────────────┐
-│        sno (hub)                  │    │       sno-mini (spoke)        │
-│  ┌────────────────────────────┐  │    │  ┌────────────────────────┐  │
-│  │ ArgoCD + Principal         │  │    │  │ ArgoCD (lightweight)   │  │
-│  │   manages sno apps         │  │    │  │   manages sno-mini     │  │
-│  │   receives spoke state     │◄─┼────┼──│ Agent (autonomous)     │  │
-│  └────────────────────────────┘  │    │  └────────────────────────┘  │
-│  ┌────────────────────────────┐  │    │                              │
-│  │ ACM Policies               │  │    │  CA + client TLS certs       │
-│  │   cert-manager CA + certs  │──┼───>│  copied via ACM policy       │
-│  │   cluster secrets          │  │    │                              │
-│  └────────────────────────────┘  │    │                              │
-└──────────────────────────────────┘    └──────────────────────────────┘
-```
-
-**Key benefits:**
-- No cluster credentials stored on the hub
-- Each cluster manages its own apps locally (full app-of-apps support)
-- Hub provides centralized observability without being a single point of failure
-- Secure mTLS communication initiated by the spoke
-- PKI fully automated via cert-manager + ACM policies
+1. Each cluster has a **root Application** that points at `clusters/<cluster>/`
+2. The cluster's `kustomization.yaml` renders the `argocd-app-of-app` Helm chart into the agent namespace (e.g., `argocd-agent-sno`)
+3. The Helm chart generates `Application` and `AppProject` CRs from `values.yaml`
+4. Each generated Application points to a **component** (reusable base manifests) with optional **cluster overlays** for environment-specific patches
+5. The agent's application controller reconciles these Applications locally
 
 ## Clusters
 
-| Cluster   | Domain                      | Description                |
-|-----------|-----------------------------|----------------------------|
-| sno       | sno.shanehomelab.com        | Primary SNO cluster        |
-| sno-mini  | sno-mini.shanehomelab.com   | Secondary SNO cluster      |
+| Cluster  | Domain                     | Role  | Agent Namespace         |
+|----------|----------------------------|-------|-------------------------|
+| sno      | sno.shanehomelab.com       | Hub   | argocd-agent-sno        |
+| sno-mini | sno-mini.shanehomelab.com  | Spoke | argocd-agent-sno-mini   |
 
 ## Prerequisites
 
-- OpenShift GitOps 1.19+ (ArgoCD Agent is GA in 1.19, released Jan 2026)
-- cert-manager operator installed on the hub (for automated PKI)
-- `helm` CLI v3.8.0+ (for Agent Helm chart on spoke)
+- OpenShift 4.x clusters
+- OpenShift GitOps 1.19+ (ArgoCD Agent GA)
+- cert-manager operator on the hub
+- Advanced Cluster Management (ACM) for multi-cluster PKI distribution
+- External Secrets Operator + HashiCorp Vault (for Git repo credentials)
 
-## Bootstrap — Standalone Mode
+## Bootstrap — Hub Cluster (sno)
 
-Each cluster gets its own ArgoCD instance and manages itself.
+### 1. Install OpenShift GitOps operator
 
 ```bash
-export INFRA_GITOPS_REPO=https://github.com/shane-snyder/ocp-homelab.git
-export CLUSTER_NAME=sno           # or sno-mini
-export CLUSTER_BASE_DOMAIN=shanehomelab.com
-
 oc apply -f .bootstrap/subscription.yaml
-# Wait for the OpenShift GitOps operator to install...
-oc apply -f .bootstrap/cluster-rolebinding.yaml
-envsubst < .bootstrap/argocd.yaml | oc apply -f -
-envsubst < .bootstrap/root-application.yaml | oc apply -f -
+# Wait for the operator to install...
 ```
 
-## Bootstrap — Agent Mode (Autonomous)
+### 2. Deploy the hub ArgoCD instance
 
-### 1. Label managed clusters in ACM
+The hub ArgoCD configuration is managed declaratively in `components/argocd-hub/`.
+Apply it initially, then ArgoCD self-manages it going forward via the
+`gitops-configuration` app.
 
 ```bash
-# Label the hub cluster as the control plane
+oc apply -k components/argocd-hub/base/
+```
+
+This creates:
+- The `argocd` namespace
+- ArgoCD instance with Principal enabled and application controller disabled
+- RBAC for the principal, server, and ApplicationSet controller across agent namespaces
+- Root application for sno-mini (managed by the hub)
+- ExternalSecret for Git repo credentials
+- cert-manager certificate for the principal
+
+### 3. Label managed clusters in ACM
+
+```bash
+# Hub cluster — the label value becomes the agent identifier
+oc label managedcluster local-cluster argocd-agent=sno
+
+# Control plane label (triggers hub-side ACM policies)
 oc label managedcluster local-cluster argocd-agent-control-plane=""
 
-# Label spoke clusters — the value becomes the agent name
+# Spoke cluster
 oc label managedcluster sno-mini argocd-agent=sno-mini
 ```
 
-### 2. Bootstrap the hub (sno)
+ACM policies in `components/acm-policies-argocd-agent/` automatically:
+- Create a cert-manager CA issuer
+- Issue per-agent mTLS certificates
+- Create agent namespaces (`argocd-agent-<name>`), AppProjects, and cluster secrets on the hub
+- Copy CA and client TLS certs to spoke clusters
+
+### 4. Apply the root application for sno
+
+The hub's root application is applied directly into the agent namespace:
 
 ```bash
-export INFRA_GITOPS_REPO=https://github.com/shane-snyder/ocp-homelab.git
-export CLUSTER_NAME=sno
-export CLUSTER_BASE_DOMAIN=shanehomelab.com
-
-oc apply -f .bootstrap/subscription.yaml
-# Wait for the OpenShift GitOps operator to install...
-oc apply -f .bootstrap/cluster-rolebinding.yaml
-envsubst < .bootstrap/agent/hub-argocd.yaml | oc apply -f -
-envsubst < .bootstrap/root-application.yaml | oc apply -f -
+cat <<'EOF' | oc apply -f -
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-applications
+  namespace: argocd-agent-sno
+spec:
+  destination:
+    namespace: argocd-agent-sno
+    server: https://kubernetes.default.svc
+  project: argocd-agent-sno
+  source:
+    repoURL: https://github.com/shane-snyder/ocp-homelab.git
+    targetRevision: HEAD
+    path: clusters/sno
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
+EOF
 ```
 
-The hub uses the standard root application (pointing to `clusters/sno`). The
-ArgoCD CR enables the Principal component with `insecureGenerate: true` for
-gRPC/JWT, while cert-manager handles the CA and resource proxy TLS certs.
+## Bootstrap — Spoke Cluster (sno-mini)
 
-The `acm-policies-argocd-agent` app (synced from `clusters/sno/values.yaml`)
-deploys ACM policies that automatically:
-- Create a self-signed cert-manager CA in `openshift-gitops`
-- Issue per-agent client and principal TLS certificates
-- Create per-agent namespaces, AppProjects, and cluster secrets on the hub
-- Copy the CA cert and client TLS cert to spoke clusters
-
-### 3. Bootstrap the spoke (sno-mini)
+### 1. Install OpenShift GitOps operator on the spoke
 
 ```bash
-export INFRA_GITOPS_REPO=https://github.com/shane-snyder/ocp-homelab.git
-export CLUSTER_NAME=sno-mini
-export CLUSTER_BASE_DOMAIN=shanehomelab.com
-
 oc apply -f .bootstrap/subscription.yaml
-# Wait for the OpenShift GitOps operator to install...
-oc apply -f .bootstrap/cluster-rolebinding.yaml
+# Wait for the operator to install...
+```
+
+### 2. Deploy the spoke ArgoCD instance
+
+```bash
 oc apply -f .bootstrap/agent/spoke-argocd.yaml
 oc apply -f .bootstrap/agent/spoke-network-policy.yaml
 ```
 
-### 4. Install the ArgoCD Agent on the spoke
+### 3. Install the ArgoCD Agent
 
 ```bash
-PRINCIPAL_ROUTE=openshift-gitops-server-openshift-gitops.apps.sno.shanehomelab.com
+PRINCIPAL_ROUTE=argocd-server-argocd.apps.sno.shanehomelab.com
 
 helm install argocd-agent openshift-helm-charts/redhat-argocd-agent \
-  --namespace openshift-gitops \
-  --set namespaceOverride=openshift-gitops \
+  --namespace argocd \
   --set agentMode="autonomous" \
   --set server="${PRINCIPAL_ROUTE}" \
-  --set argoCdRedisSecretName="openshift-gitops-redis-initial-password" \
+  --set argoCdRedisSecretName="argocd-redis-initial-password" \
   --set argoCdRedisPasswordKey="admin.password" \
-  --set redisAddress="openshift-gitops-redis:6379"
+  --set redisAddress="argocd-redis:6379"
 ```
 
-### 5. Apply the root application on the spoke
+### 4. Apply the spoke root application
 
-```bash
-envsubst < .bootstrap/agent/spoke-root-application.yaml | oc apply -f -
-```
+The sno-mini root application is managed declaratively by the hub via
+`components/argocd-hub/base/root-application-sno-mini.yaml`, so it is
+created automatically when the hub syncs. No manual step is needed.
 
-The spoke manages its own apps from `clusters/sno-mini/` — the same path used
-in standalone mode. The Agent syncs state back to the hub for visibility.
+## ACM Policies — Agent PKI
 
-## ACM Policies — ArgoCD Agent PKI
+The `acm-policies-argocd-agent` component automates all certificate and
+registration lifecycle. It deploys two ACM policies:
 
-The `acm-policies-argocd-agent` component manages all certificate lifecycle
-automatically. It deploys two ACM policies:
-
-| Policy | Runs on | What it does |
+| Policy | Runs On | What It Does |
 |--------|---------|--------------|
 | `argocd-agent-registration` | Hub (`argocd-agent-control-plane` label) | Creates cert-manager Issuers, per-agent Certificates, Namespaces, AppProjects, and cluster Secrets |
 | `argocd-agent` | Spokes (`argocd-agent` label) | Copies CA cert and client TLS cert from hub to spoke via hub templates |
 
-The ServiceAccount `argocd-agent-policy` in `acm-policies` namespace has
-permissions to read secrets from `openshift-gitops` (via RoleBinding) and
-ManagedCluster resources (via ClusterRoleBinding), enabling the hub templates
-to propagate certificates to spoke clusters.
-
 ## Adding a New Cluster
 
-1. Create `clusters/<new-cluster>/kustomization.yaml` (include desired groups)
-2. Create `clusters/<new-cluster>/values.yaml` (list cluster-specific applications)
-3. Add cluster overlays under `clusters/<new-cluster>/overlays/` as needed
-4. Bootstrap the cluster using the standalone instructions above
+1. Create `clusters/<cluster>/kustomization.yaml`:
 
-### Adding a spoke cluster (agent mode)
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+helmGlobals:
+  chartHome: ../../.helm-charts
+helmCharts:
+  - name: argocd-app-of-app
+    releaseName: <cluster>-apps
+    namespace: argocd-agent-<cluster>
+    valuesFile: values.yaml
+```
 
-In addition to steps 1-3 above:
-
-4. Label the ManagedCluster: `oc label managedcluster <cluster> argocd-agent=<cluster>`
-5. Add `argocd-agent-<cluster>` to `sourceNamespaces` in `.bootstrap/agent/hub-argocd.yaml`
-6. Re-apply the hub ArgoCD CR
-7. Bootstrap the spoke using the agent mode instructions above (steps 3-5)
-
-The ACM policies automatically handle certificate generation and distribution
-for any ManagedCluster with the `argocd-agent` label.
+2. Create `clusters/<cluster>/values.yaml` with the cluster's applications (use `sno/values.yaml` as a template, set `project: argocd-agent-<cluster>`)
+3. Add cluster overlays under `clusters/<cluster>/overlays/` as needed
+4. Label the ManagedCluster in ACM: `oc label managedcluster <cluster> argocd-agent=<cluster>`
+5. Add a root application for the new cluster in `components/argocd-hub/base/` (following `root-application-sno-mini.yaml` as a template)
+6. Bootstrap the spoke using the spoke instructions above
 
 ## Adding a New Application
 
-1. Create the component under `components/<app-name>/`
-2. Add the application entry to `groups/all/values.yaml` (if shared) or the cluster's `values.yaml`
-3. If cluster-specific config is needed, create an overlay under `clusters/<cluster>/overlays/<app>/`
+1. Create the component under `components/<app-name>/` with a `kustomization.yaml`
+2. Add the application entry to the cluster's `values.yaml`:
 
-In agent mode, apps are managed locally on each spoke — no hub-side changes
-needed for spoke-specific applications.
+```yaml
+applications:
+  my-new-app:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/my-new-app
+    destination:
+      namespace: my-namespace
+```
+
+3. If shared across all clusters, add it to `groups/all/values.yaml` instead
+4. For cluster-specific config, create an overlay at `clusters/<cluster>/overlays/<app>/`
+
+## Useful Commands
+
+```bash
+# Check all apps on the hub agent
+oc get applications.argoproj.io -n argocd-agent-sno
+
+# Check all apps on the sno-mini agent
+oc get applications.argoproj.io -n argocd-agent-sno-mini
+
+# Trigger a manual sync on the root application
+oc patch application.argoproj.io root-applications -n argocd-agent-sno \
+  --type merge -p '{"operation":{"initiatedBy":{"username":"admin","automated":false},"sync":{"revision":"HEAD"}}}'
+
+# Safely delete an ArgoCD application without deleting workloads
+oc patch application.argoproj.io <app> -n <namespace> \
+  --type json -p '[{"op":"remove","path":"/metadata/finalizers"}]'
+oc delete application.argoproj.io <app> -n <namespace>
+```
