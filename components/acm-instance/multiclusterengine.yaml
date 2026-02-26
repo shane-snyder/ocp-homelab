@@ -10,35 +10,49 @@ spec:
   availabilityConfig: High
   overrides:
     components:
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: local-cluster
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: assisted-service
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: cluster-lifecycle
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: cluster-manager
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: discovery
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: hive
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: server-foundation
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: cluster-proxy-addon
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: hypershift-local-hosting
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: hypershift
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: managedserviceaccount
-    - enabled: true
+    - configOverrides: {}
+      enabled: true
       name: console-mce
     - enabled: false
       name: image-based-install-operator
-    - enabled: false
+    - configOverrides: {}
+      enabled: false
       name: cluster-api-preview
-    - enabled: false
+    - configOverrides: {}
+      enabled: false
       name: cluster-api-provider-aws-preview
   targetNamespace: multicluster-engine
   tolerations:
