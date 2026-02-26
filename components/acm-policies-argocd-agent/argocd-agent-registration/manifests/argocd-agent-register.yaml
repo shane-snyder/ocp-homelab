@@ -70,4 +70,23 @@ object-templates-raw: |
         sourceNamespaces:
         - argocd-agent-{{ $agent_name }}
 
+  - complianceType: mustonlyhave
+    objectDefinition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: AppProject
+      metadata:
+        name: argocd-agent-{{ $agent_name }}-cluster-config
+        namespace: argocd
+      spec:
+        clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+        destinations:
+        - namespace: '*'
+          server: '*'
+        sourceRepos:
+        - '*'
+        sourceNamespaces:
+        - argocd-agent-{{ $agent_name }}
+
   {{- end }}

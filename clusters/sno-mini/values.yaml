@@ -7,7 +7,7 @@ default:
     enabled: true
     enableAutoSync: false
     autoSyncPrune: false
-    project: argocd-agent-sno-mini
+    project: cluster-config
     labels:
       app-source: ocp-homelab
       repo: cluster-config
