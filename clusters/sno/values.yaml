@@ -263,6 +263,14 @@ applications:
       path: components/cluster-observability-operator
     destination:
       namespace: openshift-cluster-observability-operator
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
 
   # --- OpenShift Virtualization (sync-wave 5) ---
   openshift-virtualization-operator:
