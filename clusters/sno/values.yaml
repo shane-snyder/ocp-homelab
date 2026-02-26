@@ -1,3 +1,37 @@
+default:
+  app:
+    annotations:
+      argocd.argoproj.io/compare-options: IgnoreExtraneous
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    enabled: true
+    enableAutoSync: false
+    autoSyncPrune: false
+    project: argocd-agent-sno
+    labels:
+      app-source: ocp-homelab
+      repo: cluster-config
+    destination:
+      namespace: openshift-gitops
+      server: https://kubernetes.default.svc
+    source:
+      repoURL: https://github.com/shane-snyder/ocp-homelab.git
+      targetRevision: HEAD
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - ServerSideApply=true
+      - FailOnSharedResource=true
+      - RespectIgnoreDifferences=true
+      - CreateNamespace=false
+    syncPolicyRetry:
+      limit: -1
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 10m
+
 applications:
   # --- Gitops Configuration (sync-wave 3) ---
   gitops-configuration:
@@ -25,6 +59,47 @@ applications:
       path: clusters/sno/overlays/oauth
     destination:
       namespace: openshift-config
+
+  # --- Shared Operators (sync-wave 5) ---
+  cert-manager-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/cert-manager-operator
+    destination:
+      namespace: cert-manager-operator
+
+  cert-utils-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/cert-utils-operator
+    destination:
+      namespace: cert-utils-operator
+
+  acs-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/acs-operator
+    destination:
+      namespace: rhacs-operator
+
+  external-secrets-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/external-secrets-operator
+    destination:
+      namespace: external-secrets
+
+  redhat-opentelemetry-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/redhat-opentelemetry-operator
+    destination:
+      namespace: openshift-opentelemetry-operator
 
   # --- Certificate Management (sync-wave 6) ---
   cert-manager-configuration:
@@ -153,22 +228,6 @@ applications:
       path: components/acm-observability
     destination:
       namespace: open-cluster-management
-
-  argocd-hub:
-    annotations:
-      argocd.argoproj.io/sync-wave: "3"
-    source:
-      path: components/argocd-hub/base
-    destination:
-      namespace: argocd
-
-  acm-policies-argocd-agent:
-    annotations:
-      argocd.argoproj.io/sync-wave: "15"
-    source:
-      path: components/acm-policies-argocd-agent
-    destination:
-      namespace: open-cluster-management-global-set
 
   # --- Ansible Automation Platform (sync-wave 10) ---
   ansible-automation-platform:
