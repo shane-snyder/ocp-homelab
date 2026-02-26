@@ -2,19 +2,19 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: root-applications
-  namespace: openshift-gitops
+  namespace: argocd-agent-${CLUSTER_NAME}
 spec:
   destination:
-    namespace: openshift-gitops
+    namespace: argocd-agent-${CLUSTER_NAME}
     server: https://kubernetes.default.svc
-  project: default
+  project: argocd-agent-${CLUSTER_NAME}
   source:
     repoURL: ${INFRA_GITOPS_REPO}
     targetRevision: HEAD
     path: clusters/${CLUSTER_NAME}
   syncPolicy:
     automated:
-      prune: true
-      selfHeal: true
+      prune: false
+      selfHeal: false
     syncOptions:
       - CreateNamespace=true

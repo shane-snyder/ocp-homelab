@@ -38,9 +38,11 @@ ocp-homelab/
 
 ## Architecture
 
-All clusters use the ArgoCD Agent model (GA in OpenShift GitOps 1.19+). The hub
-runs an ArgoCD Principal with no application controller — all reconciliation
-happens through agents, including on the hub cluster itself.
+All clusters use the ArgoCD Agent model (GA in OpenShift GitOps 1.19+) in
+**autonomous mode**. The hub runs an ArgoCD Principal with no application
+controller — all reconciliation happens through agents, including on the hub
+cluster itself. Each agent is the authority for its own applications; the
+principal provides centralized UI visibility without controlling what runs where.
 
 ```
 ┌────────────────────────────────────────┐      ┌──────────────────────────────┐
@@ -55,7 +57,7 @@ happens through agents, including on the hub cluster itself.
 │  └──────────────────────────────────┘  │      │                              │
 │                                        │      │  Agent namespace:            │
 │  ┌──────────────────────────────────┐  │      │    argocd-agent-sno-mini     │
-│  │ Local Agent (argocd-agent-sno)   │  │      │                              │
+│  │ Local Agent (argocd-agent)       │  │      │                              │
 │  │  - App controller               │  │      │  Apps: clusters/sno-mini/    │
 │  │  - Reconciles hub's own apps    │  │      │    values.yaml               │
 │  └──────────────────────────────────┘  │      │                              │
@@ -69,7 +71,8 @@ happens through agents, including on the hub cluster itself.
 ```
 
 **Key points:**
-- The hub's application controller is **disabled** — a local agent in `argocd-agent-sno` reconciles the hub's own apps
+- **Autonomous mode** — each agent is self-governing; the hub is an observer, not a controller
+- The hub's application controller is **disabled** — a local agent in `argocd-agent` reconciles the hub's own apps
 - Spoke agents connect to the hub Principal over mTLS (no cluster credentials stored on the hub)
 - Each cluster manages its own apps locally via an app-of-apps pattern
 - The hub provides centralized visibility through the ArgoCD UI

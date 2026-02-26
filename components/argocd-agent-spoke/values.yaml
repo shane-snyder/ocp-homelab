@@ -1,4 +1,4 @@
-agentMode: "managed"
+agentMode: "autonomous"
 auth: "mtls:CN=([^,]+)"
 logLevel: "info"
 logFormat: "text"

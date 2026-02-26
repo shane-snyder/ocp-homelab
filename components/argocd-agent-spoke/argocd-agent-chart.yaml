@@ -24,7 +24,7 @@ data:
   # agent.mode: The mode this agent should operate in. Valid values are
   # "autonomous" or "managed".
   # Default: "autonomous"
-  agent.mode: managed
+  agent.mode: autonomous
   # agent.creds: Valid credential identifier for this agent. Must be in the
   # format <method>:<configuration>. Valid values are:
   # - "userpass:_path_to_encrypted_creds_" where _path_to_encrypted_creds_ is
