@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/shane-snyder/ocp-homelab.git
     targetRevision: HEAD
-g    path: clusters/sno-mini
+    path: clusters/sno-mini
   syncPolicy:
     automated:
       prune: true
