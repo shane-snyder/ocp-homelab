@@ -10,4 +10,5 @@ resources:
   - repo-external-secret.yaml
   - root-application-sno-mini.yaml
   - appset-in-any-namespace-clusterrole.yaml
+  - agent-principal-rbac.yaml
   - acm-policy-rolebinding.yaml

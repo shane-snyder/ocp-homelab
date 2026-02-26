@@ -39,6 +39,8 @@ spec:
       route:
         enabled: false
   server:
+    extraCommandArgs:
+      - "--application-namespaces=argocd-agent-*"
     autoscale:
       enabled: false
     grpc:
