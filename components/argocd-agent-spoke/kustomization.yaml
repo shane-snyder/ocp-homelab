@@ -17,6 +17,7 @@ resources:
   - argocd-agent-cluster-admin-role.yaml
   - application-controller-cluster-admin-role.yaml
   - agent-redis-networkpolicy.yaml
+  - appproject-cluster-config.yaml
 
 patches:
   - patch: |-
