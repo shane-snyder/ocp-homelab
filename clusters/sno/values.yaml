@@ -345,15 +345,6 @@ applications:
     syncOptions:
       - CreateNamespace=true
 
-  # --- iDRAC Start/Stop (sync-wave 10) ---
-  idrac-start-stop:
-    annotations:
-      argocd.argoproj.io/sync-wave: "10"
-    source:
-      path: components/idrac-start-stop
-    destination:
-      namespace: idrac
-
   # --- OADP Operator (sync-wave 5) ---
   oadp-operator:
     annotations:
