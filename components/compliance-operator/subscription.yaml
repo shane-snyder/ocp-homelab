@@ -3,7 +3,7 @@ kind: Subscription
 metadata:
   name: compliance-operator
 spec:
-  channel: "patch-me-in-overlay"
+  channel: stable
   installPlanApproval: Automatic
   name: compliance-operator
   source: redhat-operators
