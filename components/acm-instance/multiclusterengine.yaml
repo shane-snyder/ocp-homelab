@@ -50,11 +50,11 @@ spec:
       enabled: false
       name: image-based-install-operator
     - configOverrides: {}
-      enabled: true
-      name: cluster-api-preview
+      enabled: false
+      name: cluster-api
     - configOverrides: {}
-      enabled: true
-      name: cluster-api-provider-aws-preview
+      enabled: false
+      name: cluster-api-provider-aws
     - configOverrides: {}	
       enabled: false	
       name: cluster-api-provider-metal3	
