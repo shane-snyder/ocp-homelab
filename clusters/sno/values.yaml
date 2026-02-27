@@ -238,7 +238,16 @@ applications:
     destination:
       namespace: open-cluster-management
 
-  # --- Ansible Automation Platform (sync-wave 10) ---
+  # --- Ansible Automation Platform Operator (sync-wave 5) ---
+  aap-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/aap-operator
+    destination:
+      namespace: ansible-automation-platform
+
+  # --- Ansible Automation Platform Instance (sync-wave 10) ---
   ansible-automation-platform:
     annotations:
       argocd.argoproj.io/sync-wave: "10"
