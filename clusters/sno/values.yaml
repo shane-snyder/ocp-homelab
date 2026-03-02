@@ -33,6 +33,25 @@ default:
         maxDuration: 10m
 
 applications:
+  # --- Root Application (sync-wave 1, self-managing) ---
+  root-applications:
+    annotations:
+      argocd.argoproj.io/sync-wave: "1"
+    enableAutoSync: true
+    autoSyncPrune: false
+    source:
+      path: clusters/sno
+    destination:
+      namespace: argocd-agent-sno
+    extraFields: |
+      ignoreDifferences:
+        - group: argoproj.io
+          kind: Application
+          jsonPointers:
+            - /spec/project
+            - /spec/destination/server
+            - /spec/destination/name
+
   # --- Gitops Configuration (sync-wave 3) ---
   gitops-configuration:
     annotations:
