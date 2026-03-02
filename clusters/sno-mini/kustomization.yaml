@@ -7,5 +7,5 @@ helmGlobals:
 helmCharts:
   - name: argocd-app-of-app
     releaseName: sno-mini-apps
-    namespace: argocd-agent-sno-mini
+    namespace: argocd-agent
     valuesFile: values.yaml

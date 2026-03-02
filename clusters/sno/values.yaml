@@ -42,15 +42,7 @@ applications:
     source:
       path: clusters/sno
     destination:
-      namespace: argocd-agent-sno
-    extraFields: |
-      ignoreDifferences:
-        - group: argoproj.io
-          kind: Application
-          jsonPointers:
-            - /spec/project
-            - /spec/destination/server
-            - /spec/destination/name
+      namespace: argocd-agent
 
   # --- Gitops Configuration (sync-wave 3) ---
   gitops-configuration:

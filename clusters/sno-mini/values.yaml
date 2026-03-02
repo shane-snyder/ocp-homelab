@@ -42,15 +42,7 @@ applications:
     source:
       path: clusters/sno-mini
     destination:
-      namespace: argocd-agent-sno-mini
-    extraFields: |
-      ignoreDifferences:
-        - group: argoproj.io
-          kind: Application
-          jsonPointers:
-            - /spec/project
-            - /spec/destination/server
-            - /spec/destination/name
+      namespace: argocd-agent
 
   # --- Shared Operators (sync-wave 5) ---
   cert-manager-operator:

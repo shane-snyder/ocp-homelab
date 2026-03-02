@@ -2,27 +2,19 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: root-applications
-  namespace: argocd-agent-${CLUSTER_NAME}
+  namespace: argocd-agent
 spec:
   destination:
-    namespace: argocd-agent-${CLUSTER_NAME}
+    namespace: argocd-agent
     server: https://kubernetes.default.svc
-  project: argocd-agent-${CLUSTER_NAME}
+  project: cluster-config
   source:
     repoURL: ${INFRA_GITOPS_REPO}
     targetRevision: HEAD
     path: clusters/${CLUSTER_NAME}
-  ignoreDifferences:
-    - group: argoproj.io
-      kind: Application
-      jsonPointers:
-        - /spec/project
-        - /spec/destination/server
-        - /spec/destination/name
   syncPolicy:
     automated:
       prune: false
       selfHeal: false
     syncOptions:
       - CreateNamespace=true
-      - RespectIgnoreDifferences=true
