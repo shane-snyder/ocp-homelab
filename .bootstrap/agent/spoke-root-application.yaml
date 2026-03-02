@@ -12,9 +12,15 @@ spec:
     repoURL: ${INFRA_GITOPS_REPO}
     targetRevision: HEAD
     path: clusters/${CLUSTER_NAME}
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      jsonPointers:
+        - /spec/project
   syncPolicy:
     automated:
       prune: false
       selfHeal: false
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true

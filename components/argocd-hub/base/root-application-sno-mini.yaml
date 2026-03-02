@@ -12,9 +12,15 @@ spec:
     repoURL: https://github.com/shane-snyder/ocp-homelab.git
     targetRevision: HEAD
     path: clusters/sno-mini
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      jsonPointers:
+        - /spec/project
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
