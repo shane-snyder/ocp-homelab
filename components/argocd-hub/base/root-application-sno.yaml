@@ -12,17 +12,9 @@ spec:
     repoURL: https://github.com/shane-snyder/ocp-homelab.git
     targetRevision: HEAD
     path: clusters/sno
-  ignoreDifferences:
-    - group: argoproj.io
-      kind: Application
-      jsonPointers:
-        - /spec/project
-        - /spec/destination/server
-        - /spec/destination/name
   syncPolicy:
     automated:
       prune: false
       selfHeal: false
     syncOptions:
       - CreateNamespace=true
-      - RespectIgnoreDifferences=true
