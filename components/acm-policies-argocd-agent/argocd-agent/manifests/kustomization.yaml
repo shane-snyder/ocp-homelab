@@ -7,3 +7,4 @@ resources:
   - ../../../../components/argocd-agent-spoke
   - argocd-agent-ca.yaml
   - argocd-agent-client-tls.yaml
+  - repo-ocp-homelab.yaml
