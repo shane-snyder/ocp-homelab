@@ -1,0 +1,26 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: gen-policy-project-quotas
+policyDefaults:
+  namespace: open-cluster-management-global-set
+  remediationAction: inform
+  categories: []
+  controls: []
+  standards: []
+  policySets:
+    - project-quotas
+placementBindingDefaults:
+  name: "project-quotas-binding"
+
+policies:
+  - name: namespace-missing-quota
+    remediationAction: inform
+    manifests:
+      - path: namespace-missing-quota.yml
+
+policySets:
+  - name: project-quotas
+    placement:
+      placementName: "global"

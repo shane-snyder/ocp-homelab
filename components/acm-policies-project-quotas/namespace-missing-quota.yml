@@ -1,0 +1,46 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: namespace-missing-quota
+spec:
+  remediationAction: inform
+  severity: medium
+  object-templates-raw: |
+    {{- $excludedPrefixes := list "openshift-" "kube-" "open-cluster-management" }}
+    {{- $excludedNames := list "default" "openshift" "multicluster-engine" }}
+
+    {{- range $ns := (lookup "v1" "Namespace" "" "").items }}
+      {{- $nsName := $ns.metadata.name }}
+      {{- $excluded := false }}
+
+      {{/* Skip namespaces that are terminating */}}
+      {{- if eq (default "" $ns.status.phase) "Terminating" }}
+        {{- $excluded = true }}
+      {{- end }}
+
+      {{/* Skip system namespaces by prefix */}}
+      {{- range $prefix := $excludedPrefixes }}
+        {{- if hasPrefix $prefix $nsName }}
+          {{- $excluded = true }}
+        {{- end }}
+      {{- end }}
+
+      {{/* Skip system namespaces by name */}}
+      {{- if has $nsName $excludedNames }}
+        {{- $excluded = true }}
+      {{- end }}
+
+      {{- if not $excluded }}
+        {{- $quotas := (lookup "v1" "ResourceQuota" $nsName "").items }}
+        {{- $clusterQuotas := (lookup "quota.openshift.io/v1" "AppliedClusterResourceQuota" $nsName "").items }}
+        {{- if and (eq (len $quotas) 0) (eq (len $clusterQuotas) 0) }}
+    - complianceType: musthave
+      objectDefinition:
+        apiVersion: v1
+        kind: ResourceQuota
+        metadata:
+          namespace: {{ $nsName }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
