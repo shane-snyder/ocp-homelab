@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+  labels:
+    app: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      serviceAccountName: ollama
+      containers:
+      - name: ollama
+        image: docker.io/ollama/ollama:latest
+        ports:
+        - name: http
+          containerPort: 11434
+          protocol: TCP
+        resources:
+          requests:
+            cpu: "8"
+            memory: "16Gi"
+          limits:
+            cpu: "12"
+            memory: "32Gi"
+        volumeMounts:
+        - name: ollama-data
+          mountPath: /root/.ollama
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 15
+      volumes:
+      - name: ollama-data
+        persistentVolumeClaim:
+          claimName: ollama-data

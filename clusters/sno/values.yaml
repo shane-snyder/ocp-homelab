@@ -416,3 +416,12 @@ applications:
       path: components/tempo-configuration
     destination:
       namespace: openshift-tempo-operator
+
+  # --- Ollama + Open WebUI (sync-wave 10) ---
+  ollama:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/ollama
+    destination:
+      namespace: ollama
