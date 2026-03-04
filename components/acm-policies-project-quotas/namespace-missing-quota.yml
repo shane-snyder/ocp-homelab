@@ -6,6 +6,9 @@ metadata:
 spec:
   remediationAction: inform
   severity: medium
+  evaluationInterval:
+    compliant: 30m
+    noncompliant: 15m
   object-templates-raw: |
     {{- $excludedPrefixes := list "openshift-" "kube-" "open-cluster-management" }}
     {{- $excludedNames := list "default" "openshift" "multicluster-engine" }}
@@ -33,8 +36,15 @@ spec:
 
       {{- if not $excluded }}
         {{- $quotas := (lookup "v1" "ResourceQuota" $nsName "").items }}
-        {{- $clusterQuotas := (lookup "quota.openshift.io/v1" "AppliedClusterResourceQuota" $nsName "").items }}
-        {{- if and (eq (len $quotas) 0) (eq (len $clusterQuotas) 0) }}
+        {{- $hasClusterQuota := false }}
+        {{- range $crq := (lookup "quota.openshift.io/v1" "ClusterResourceQuota" "" "").items }}
+          {{- range $nsQuota := $crq.status.namespaces }}
+            {{- if eq $nsQuota.namespace $nsName }}
+              {{- $hasClusterQuota = true }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- if and (eq (len $quotas) 0) (not $hasClusterQuota) }}
     - complianceType: musthave
       objectDefinition:
         apiVersion: v1
