@@ -7,6 +7,7 @@ resources:
   - 001-namespace.yaml
   - 002-serviceaccount.yaml
   - 003-scc.yaml
+  - 004-external-secret.yaml
   - 004-pvc-ollama.yaml
   - 004-pvc-open-webui.yaml
   - 005-deployment-ollama.yaml

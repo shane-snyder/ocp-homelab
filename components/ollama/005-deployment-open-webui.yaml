@@ -28,10 +28,15 @@ spec:
         env:
         - name: OLLAMA_BASE_URL
           value: "http://ollama:11434"
+        - name: WEBUI_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: open-webui-secret
+              key: WEBUI_SECRET_KEY
         resources:
           requests:
-            cpu: "1"
-            memory: "2Gi"
+            cpu: "100m"
+            memory: "256Mi"
           limits:
             cpu: "2"
             memory: "4Gi"

@@ -28,11 +28,11 @@ spec:
           protocol: TCP
         resources:
           requests:
-            cpu: "8"
-            memory: "16Gi"
+            cpu: "500m"
+            memory: "2Gi"
           limits:
             cpu: "12"
-            memory: "32Gi"
+            memory: "48Gi"
         volumeMounts:
         - name: ollama-data
           mountPath: /root/.ollama
