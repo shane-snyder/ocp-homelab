@@ -434,3 +434,13 @@ applications:
       path: components/ollama
     destination:
       namespace: ollama
+
+  # --- OCP Apps (sync-wave 10, app-of-apps for health-monitoring) ---
+  ocp-apps:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      repoURL: https://github.com/shane-snyder/ocp-apps.git
+      path: clusters/sno
+    destination:
+      namespace: argocd-agent
