@@ -6,5 +6,4 @@ namespace: external-secrets
 
 resources:
   - default-operatorconfig.yaml
-  - rotator-role-sa.yaml
-  - rotator-cronjob.yaml
+  - external-secrets-sa.yaml

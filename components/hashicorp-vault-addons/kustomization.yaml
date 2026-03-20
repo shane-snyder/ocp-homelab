@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - vault-serviceaccount.yaml
+  - vault-auth-sa.yaml
   - vault-clusterrole.yaml
   - vault-clusterrolebinding.yaml
   - vault-token-creator-binding.yaml

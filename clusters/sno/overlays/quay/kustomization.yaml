@@ -13,7 +13,3 @@ resources:
   - 005-minio-nodeport.yaml
   - 005-postgres-nodeport.yaml
   - 005-redis-nodeport.yaml
-
-patchesStrategicMerge:
-  # Add any patches specific to SNO here, if needed
-

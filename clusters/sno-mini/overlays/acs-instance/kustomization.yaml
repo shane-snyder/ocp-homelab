@@ -5,4 +5,3 @@ namespace: stackrox
 
 resources:
   - ../../../../components/acs-secured-clusters
-  - sno-mini-Operator-secrets-cluster-init-bundle.yaml
