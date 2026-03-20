@@ -80,14 +80,6 @@ applications:
     destination:
       namespace: cert-manager-operator
 
-  cert-utils-operator:
-    annotations:
-      argocd.argoproj.io/sync-wave: "5"
-    source:
-      path: components/cert-utils-operator
-    destination:
-      namespace: cert-utils-operator
-
   acs-operator:
     annotations:
       argocd.argoproj.io/sync-wave: "5"
