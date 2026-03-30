@@ -77,6 +77,14 @@ applications:
     destination:
       namespace: openshift-opentelemetry-operator
 
+  openshift-pipelines-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/openshift-pipelines-operator
+    destination:
+      namespace: openshift-pipelines
+
   # --- Gitops Configuration (sync-wave 3) ---
   gitops-configuration:
     annotations:

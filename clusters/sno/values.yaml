@@ -104,6 +104,14 @@ applications:
     destination:
       namespace: openshift-opentelemetry-operator
 
+  openshift-pipelines-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/openshift-pipelines-operator
+    destination:
+      namespace: openshift-pipelines
+
   # --- Certificate Management (sync-wave 6) ---
   cert-manager-configuration:
     annotations:
