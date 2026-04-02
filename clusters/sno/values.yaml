@@ -88,6 +88,14 @@ applications:
     destination:
       namespace: rhacs-operator
 
+  quay-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/quay-operator
+    destination:
+      namespace: quay-operator
+
   external-secrets-operator:
     annotations:
       argocd.argoproj.io/sync-wave: "5"

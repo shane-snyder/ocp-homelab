@@ -8,6 +8,7 @@ resources:
   - argocd.yaml
   - principal-cert.yaml
   - repo-external-secret.yaml
+  - repo-external-secret-castreport.yaml
   - appset-in-any-namespace-clusterrole.yaml
-  - agent-principal-rbac.yaml
+  - agent-principal-rbac.yaml 
   - acm-policy-rolebinding.yaml

@@ -1,0 +1,15 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: console-search-config
+  namespace: open-cluster-management
+data:
+  suggestedSearches: |-
+    [
+      {
+        "id": "search.suggested.quay-server-images.name",
+        "name": "Quay Server Images",
+        "description": "Show pods using images from quay-server",
+        "searchText": "kind:Pod image:quay-server*"
+      }
+    ]
