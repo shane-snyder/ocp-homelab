@@ -6,6 +6,7 @@ commonAnnotations:
 
 resources:
   - ../../../../components/quay
+  - 000-quay-subscription.yaml
   - 003-config-bundle-secret-external-secret.yaml
   - 004-quayregistry.yaml
   - 005-minio-nodeport.yaml

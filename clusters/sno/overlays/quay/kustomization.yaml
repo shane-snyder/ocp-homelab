@@ -6,6 +6,7 @@ commonAnnotations:
 
 resources:
   - ../../../../components/quay
+  - 000-quay-subscription.yaml
   - 002-gitops-role-binding.yaml
   - 003-config-bundle-secret-external-secret.yaml
   - 004-quayregistry.yaml
