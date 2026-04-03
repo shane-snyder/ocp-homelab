@@ -5,6 +5,7 @@ commonAnnotations:
   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   
 resources:
+  - 000-quay-subscription.yaml
   - 001-quay-enterprise-namespace.yaml
 
 namespace: quay-enterprise
