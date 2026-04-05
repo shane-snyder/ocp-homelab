@@ -285,6 +285,15 @@ applications:
     syncOptions:
       - CreateNamespace=true
 
+  # --- ArgoCD Agent sno-mini repo secrets (sync-wave 14) ---
+  argocd-agent-sno-mini:
+    annotations:
+      argocd.argoproj.io/sync-wave: "14"
+    source:
+      path: clusters/sno-mini/overlays/argocd-agent-sno-mini
+    destination:
+      namespace: argocd-agent-sno-mini
+
   # --- OCP Apps: Health Monitoring (sync-wave 15) ---
   ocp-apps:
     annotations:
@@ -293,4 +302,4 @@ applications:
       repoURL: https://github.com/shane-snyder/ocp-apps.git
       path: clusters/sno-mini
     destination:
-      namespace: argocd-agent
+      namespace: argocd-agent-sno-mini
