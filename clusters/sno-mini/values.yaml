@@ -285,14 +285,14 @@ applications:
     syncOptions:
       - CreateNamespace=true
 
-  # --- ArgoCD Agent sno-mini repo secrets (sync-wave 14) ---
+  # --- ArgoCD Agent repo secrets (sync-wave 14) ---
   argocd-agent-sno-mini:
     annotations:
       argocd.argoproj.io/sync-wave: "14"
     source:
       path: clusters/sno-mini/overlays/argocd-agent-sno-mini
     destination:
-      namespace: argocd-agent-sno-mini
+      namespace: argocd-agent
 
   # --- OCP Apps: Health Monitoring (sync-wave 15) ---
   ocp-apps:
