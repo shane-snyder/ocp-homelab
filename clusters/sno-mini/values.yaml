@@ -284,3 +284,13 @@ applications:
       namespace: vault
     syncOptions:
       - CreateNamespace=true
+
+  # --- OCP Apps: Health Monitoring (sync-wave 15) ---
+  ocp-apps:
+    annotations:
+      argocd.argoproj.io/sync-wave: "15"
+    source:
+      repoURL: https://github.com/shane-snyder/ocp-apps.git
+      path: clusters/sno-mini
+    destination:
+      namespace: argocd-agent
