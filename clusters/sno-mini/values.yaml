@@ -302,4 +302,4 @@ applications:
       repoURL: https://github.com/shane-snyder/ocp-apps.git
       path: clusters/sno-mini
     destination:
-      namespace: argocd-agent-sno-mini
+      namespace: argocd-agent
