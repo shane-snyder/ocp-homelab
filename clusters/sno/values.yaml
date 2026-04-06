@@ -143,8 +143,6 @@ applications:
             - sno-values.yaml
     destination:
       namespace: garage
-    syncOptions:
-      - CreateNamespace=true
 
   # --- Garage Secrets (sync-wave 9, before workload updates) ---
   garage-secrets:
@@ -154,8 +152,6 @@ applications:
       path: clusters/sno/overlays/garage-secrets
     destination:
       namespace: garage
-    syncOptions:
-      - CreateNamespace=true
 
   # --- MinIO Operator (sync-wave 5) ---
   minio-operator:
