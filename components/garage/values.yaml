@@ -1,0 +1,137 @@
+commonLabels: {}
+
+garage:
+  dbEngine: "lmdb"
+  blockSize: "1048576"
+  replicationFactor: "3"
+  consistencyMode: "consistent"
+  compressionLevel: "1"
+  metadataAutoSnapshotInterval: ""
+  rpcBindAddr: "[::]:3901"
+  rpcSecret: ""
+  existingRpcSecret: ""
+  bootstrapPeers: []
+  kubernetesSkipCrd: false
+  s3:
+    api:
+      region: "garage"
+      rootDomain: ".s3.garage.tld"
+    web:
+      rootDomain: ".web.garage.tld"
+      index: "index.html"
+  additionalTopLevelConfig: ""
+  existingConfigMap: ""
+  garageTomlString: ""
+
+persistence:
+  enabled: true
+  meta:
+    size: 100Mi
+    hostPath: /var/lib/garage/meta
+  data:
+    size: 100Mi
+    hostPath: /var/lib/garage/data
+
+deployment:
+  kind: StatefulSet
+  replicaCount: 3
+  podManagementPolicy: OrderedReady
+
+image:
+  repository: dxflrs/amd64_garage
+  tag: ""
+  pullPolicy: IfNotPresent
+
+initImage:
+  repository: busybox
+  tag: stable
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: "OnRootMismatch"
+  runAsNonRoot: true
+
+securityContext:
+  capabilities:
+    drop: [ALL]
+  readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  annotations: {}
+  s3:
+    api:
+      port: 3900
+    web:
+      port: 3902
+
+ingress:
+  s3:
+    api:
+      enabled: false
+      annotations: {}
+      labels: {}
+      hosts:
+        - host: "s3.garage.tld"
+          paths: [{path: /, pathType: Prefix}]
+        - host: "*.s3.garage.tld"
+          paths: [{path: /, pathType: Prefix}]
+      tls: []
+    web:
+      enabled: false
+      annotations: {}
+      labels: {}
+      hosts:
+        - host: "*.web.garage.tld"
+          paths: [{path: /, pathType: Prefix}]
+        - host: "mywebpage.example.com"
+          paths: [{path: /, pathType: Prefix}]
+      tls: []
+
+# OCP Route configuration (replaces ingress for OpenShift clusters)
+route:
+  s3:
+    enabled: false
+    host: ""
+    tls:
+      termination: edge
+
+resources: {}
+livenessProbe: {}
+readinessProbe: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+environment: {}
+extraVolumes: {}
+extraVolumeMounts: {}
+
+monitoring:
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+      path: /metrics
+      labels: {}
+      interval: 15s
+      scheme: http
+      tlsConfig: {}
+      scrapeTimeout: 10s
+      relabelings: []
+  tracing:
+    sink: ""

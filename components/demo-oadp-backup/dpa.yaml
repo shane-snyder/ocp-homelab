@@ -23,8 +23,8 @@ spec:
           bucket: oadp-backup
           prefix: backups
         config:
-          region: minio
-          s3Url: https://minio-openshift-adp.apps.sno.shanehomelab.com
+          region: garage
+          s3Url: https://garage-s3.apps.sno.shanehomelab.com
           insecureSkipTLSVerify: "true"
           s3ForcePathStyle: "true"
         credential:
