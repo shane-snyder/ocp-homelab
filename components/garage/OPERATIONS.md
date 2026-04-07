@@ -158,5 +158,5 @@ ExternalSecrets for each workload are defined in `clusters/sno/overlays/garage-s
 | Internal (in-cluster) | `http://garage.garage.svc:3900`        |
 | External (OCP Route)  | `https://garage-s3.apps.sno.shanehomelab.com` |
 
-S3 region string: `garage`
+S3 region string: `us-east-1`
 Path-style access required: `s3ForcePathStyle=true`
