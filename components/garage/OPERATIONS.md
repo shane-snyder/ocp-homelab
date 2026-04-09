@@ -28,8 +28,8 @@ After the pod first starts, the node has no role. Assign it a zone and capacity:
 # Get the node ID
 oc exec -n garage garage-0 -- /garage status
 
-# Assign layout (capacity is in KB; example: 2.2TB = 2200000000 KB)
-oc exec -n garage garage-0 -- /garage layout assign -z dc1 -c <capacity-kb> <node-id>
+# Assign layout (capacity is in bytes; example: 500GiB = 536870912000, 2200GiB = 2362232012800)
+oc exec -n garage garage-0 -- /garage layout assign -z dc1 -c <capacity-bytes> <node-id>
 
 # Stage and apply
 oc exec -n garage garage-0 -- /garage layout apply --version 1
