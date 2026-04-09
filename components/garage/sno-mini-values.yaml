@@ -1,0 +1,77 @@
+# Garage configuration for SNO-mini (single-node OpenShift) homelab cluster
+
+deployment:
+  kind: StatefulSet
+  replicaCount: 1
+
+garage:
+  replicationFactor: 1
+  consistencyMode: "consistent"
+  dbEngine: "lmdb"
+  blockSize: "1048576"
+  compressionLevel: "1"
+  rpcBindAddr: "[::]:3901"
+  kubernetesSkipCrd: false
+  s3:
+    api:
+      region: "us-east-1"
+      rootDomain: ".s3.garage.tld"
+    web:
+      rootDomain: ".web.garage.tld"
+      index: "index.html"
+
+persistence:
+  enabled: true
+  meta:
+    size: 10Gi
+    storageClass: lvms-mini
+  data:
+    size: 500Gi
+    storageClass: lvms-mini
+
+image:
+  repository: dxflrs/amd64_garage
+  pullPolicy: IfNotPresent
+
+initImage:
+  repository: busybox
+  tag: stable
+  pullPolicy: IfNotPresent
+
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroupChangePolicy: "OnRootMismatch"
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+service:
+  type: ClusterIP
+  s3:
+    api:
+      port: 3900
+    web:
+      port: 3902
+
+ingress:
+  s3:
+    api:
+      enabled: false
+    web:
+      enabled: false
+
+# OCP Route exposing the S3 API externally
+route:
+  s3:
+    enabled: true
+    host: garage-s3.apps.sno-mini.shanehomelab.com
+    tls:
+      termination: edge
+
+monitoring:
+  metrics:
+    enabled: false

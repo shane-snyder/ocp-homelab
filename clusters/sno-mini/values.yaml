@@ -130,6 +130,29 @@ applications:
     destination:
       namespace: external-secrets
 
+  # --- Garage Object Storage (sync-wave 5) ---
+  garage:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/garage
+      extraSourceFields: |
+        helm:
+          releaseName: garage
+          valueFiles:
+            - sno-mini-values.yaml
+    destination:
+      namespace: garage
+
+  # --- Garage Secrets (sync-wave 9, before workload updates) ---
+  garage-secrets:
+    annotations:
+      argocd.argoproj.io/sync-wave: "9"
+    source:
+      path: clusters/sno-mini/overlays/garage-secrets
+    destination:
+      namespace: garage
+
   # --- MinIO Operator (sync-wave 5) ---
   minio-operator:
     annotations:

@@ -135,6 +135,8 @@ oc exec -n garage garage-0 -- /garage bucket allow <bucket-name> \
 
 ## Credentials Storage Convention
 
+### SNO
+
 All Garage access keys are stored in Vault under the `sno/` KV engine:
 
 | Vault path                         | Workload                    |
@@ -149,14 +151,35 @@ Each path contains two fields: `accessKey` and `secretKey`.
 
 ExternalSecrets for each workload are defined in `clusters/sno/overlays/garage-secrets/`.
 
+### SNO-mini
+
+All Garage access keys are stored in Vault under the `sno-mini/` KV engine:
+
+| Vault path                         | Workload                    |
+|------------------------------------|-----------------------------|
+| `sno-mini/garage/quay`             | Quay container registry     |
+
+Each path contains two fields: `accessKey` and `secretKey`.
+
+ExternalSecrets for each workload are defined in `clusters/sno-mini/overlays/garage-secrets/`.
+
 ---
 
 ## S3 Endpoint Reference
 
-| Endpoint          | URL                                        |
-|-------------------|--------------------------------------------|
-| Internal (in-cluster) | `http://garage.garage.svc:3900`        |
-| External (OCP Route)  | `https://garage-s3.apps.sno.shanehomelab.com` |
+### SNO
+
+| Endpoint              | URL                                             |
+|-----------------------|-------------------------------------------------|
+| Internal (in-cluster) | `http://garage.garage.svc:3900`                 |
+| External (OCP Route)  | `https://garage-s3.apps.sno.shanehomelab.com`   |
+
+### SNO-mini
+
+| Endpoint              | URL                                                  |
+|-----------------------|------------------------------------------------------|
+| Internal (in-cluster) | `http://garage.garage.svc:3900`                      |
+| External (OCP Route)  | `https://garage-s3.apps.sno-mini.shanehomelab.com`   |
 
 S3 region string: `us-east-1`
 Path-style access required: `s3ForcePathStyle=true`
