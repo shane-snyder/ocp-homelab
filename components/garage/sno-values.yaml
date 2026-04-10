@@ -14,7 +14,7 @@ garage:
   kubernetesSkipCrd: false
   s3:
     api:
-      region: "us-east-1"
+      region: "garage"
       rootDomain: ".s3.garage.tld"
     web:
       rootDomain: ".web.garage.tld"
