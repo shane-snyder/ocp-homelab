@@ -22,7 +22,7 @@ spec:
           bucket: oadp-backup
           prefix: backups
         config:
-          region: us-east-1
+          region: garage
           s3Url: https://garage-s3.apps.sno.shanehomelab.com
           insecureSkipTLSVerify: "true"
           s3ForcePathStyle: "true"
