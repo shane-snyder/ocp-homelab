@@ -117,7 +117,7 @@ applications:
     annotations:
       argocd.argoproj.io/sync-wave: "6"
     source:
-      path: clusters/sno-mini/overlays/openshift-pipelines-operator
+      path: components/openshift-pipelines-operator
     destination:
       namespace: openshift-pipelines
 
