@@ -111,6 +111,15 @@ applications:
       path: clusters/sno-mini/overlays/oauth
     destination:
       namespace: openshift-config
+      
+  # --- OpenShift Pipelines Operator (sync-wave 5) ---
+  openshift-pipelines-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno-mini/overlays/openshift-pipelines-operator
+    destination:
+      namespace: openshift-pipelines
 
   # --- Certificate Management (sync-wave 6) ---
   cert-manager-configuration:
