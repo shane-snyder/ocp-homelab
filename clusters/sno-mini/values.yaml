@@ -152,6 +152,15 @@ applications:
             - sno-mini-values.yaml
     destination:
       namespace: garage
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: ""
+          kind: Secret
+          name: garage-rpc-secret
+          jsonPointers:
+            - /data
 
   # --- Garage Secrets (sync-wave 9, before workload updates) ---
   garage-secrets:
