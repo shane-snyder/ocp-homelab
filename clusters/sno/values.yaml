@@ -467,6 +467,17 @@ applications:
     destination:
       namespace: ollama
 
+  # --- RHEL 10 VM (sync-wave 10) ---
+  rhel10-vm:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/rhel10-vm
+    destination:
+      namespace: rhel10-vm
+    syncOptions:
+      - CreateNamespace=true
+
   # --- OCP Apps (sync-wave 10, app-of-apps for health-monitoring) ---
   ocp-apps:
     annotations:

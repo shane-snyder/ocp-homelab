@@ -1,0 +1,60 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: rhel10-dnf-check
+  namespace: rhel10-vm
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  labels:
+    app: rhel10-dnf-check
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/domain: rhel10-dnf-check
+    spec:
+      domain:
+        cpu:
+          cores: 1
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - disk:
+                bus: virtio
+              name: rootdisk
+            - disk:
+                bus: virtio
+              name: cloudinitdisk
+          interfaces:
+            - masquerade: {}
+              name: default
+          rng: {}
+        resources:
+          requests:
+            memory: 2Gi
+      networks:
+        - name: default
+          pod: {}
+      volumes:
+        - dataVolume:
+            name: rhel10-dnf-check-rootdisk
+          name: rootdisk
+        - cloudInitNoCloud:
+            userDataSecretRef:
+              name: rhel10-dnf-check-cloudinit
+          name: cloudinitdisk
+  dataVolumeTemplates:
+    - metadata:
+        name: rhel10-dnf-check-rootdisk
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: rhel10
+          namespace: openshift-virtualization-os-images
+        storage:
+          resources:
+            requests:
+              storage: 30Gi
+          storageClassName: lvms-dell
