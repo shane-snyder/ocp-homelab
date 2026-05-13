@@ -1,0 +1,8 @@
+ingress:
+  host: openshift-mcp-server.apps.sno.shanehomelab.com
+
+metrics:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true

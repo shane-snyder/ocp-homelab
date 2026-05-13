@@ -484,6 +484,12 @@ applications:
       argocd.argoproj.io/sync-wave: "10"
     source:
       path: components/openshift-mcp-server
+      extraSourceFields: |
+        helm:
+          releaseName: openshift-mcp-server
+          valueFiles:
+            - values-openshift.yaml
+            - sno-values.yaml
     destination:
       namespace: openshift-mcp-server
     syncOptions:
