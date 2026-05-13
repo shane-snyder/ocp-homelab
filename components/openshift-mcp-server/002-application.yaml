@@ -11,7 +11,7 @@ spec:
   destination:
     namespace: openshift-mcp-server
     server: https://kubernetes.default.svc
-  project: external
+  project: cluster-config
   source:
     repoURL: oci://ghcr.io/openshift/charts
     chart: openshift-mcp-server
