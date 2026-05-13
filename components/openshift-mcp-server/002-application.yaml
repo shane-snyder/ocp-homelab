@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openshift-mcp-server-helm
+  namespace: argocd-agent
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: openshift-mcp-server
+    server: https://kubernetes.default.svc
+  project: external
+  source:
+    repoURL: oci://ghcr.io/openshift/charts
+    chart: openshift-mcp-server
+    targetRevision: 0.2.0
+    helm:
+      values: |
+        openshift: true
+
+        ingress:
+          host: openshift-mcp-server.apps.sno.shanehomelab.com
+
+        metrics:
+          serviceMonitor:
+            enabled: true
+          prometheusRule:
+            enabled: true
+
+        config:
+          port: "8080"
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - ApplyOutOfSyncOnly=true
