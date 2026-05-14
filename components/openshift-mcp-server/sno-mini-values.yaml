@@ -33,3 +33,8 @@ rbac:
     - name: core-read
       roleRef:
         name: core-read
+
+  # sno-mini has no ACM/MCE, so drop the multicluster-engine Role/RoleBinding
+  # inherited from values-openshift.yaml (the namespace doesn't exist here).
+  extraRoles: []
+  extraRoleBindings: []
