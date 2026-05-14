@@ -1,0 +1,35 @@
+ingress:
+  host: openshift-mcp-server.apps.sno-mini.shanehomelab.com
+
+metrics:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+
+rbac:
+  extraClusterRoles:
+    - name: core-read
+      rules:
+        - apiGroups: [""]
+          resources: ["pods", "pods/log", "services", "endpoints", "configmaps",
+                      "namespaces", "events", "nodes", "nodes/log", "nodes/proxy",
+                      "nodes/stats", "persistentvolumes", "persistentvolumeclaims",
+                      "replicationcontrollers", "resourcequotas", "serviceaccounts"]
+          verbs: ["get", "list", "watch"]
+        - apiGroups: ["apps"]
+          resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+          verbs: ["get", "list", "watch"]
+        - apiGroups: ["batch"]
+          resources: ["jobs", "cronjobs"]
+          verbs: ["get", "list", "watch"]
+        - apiGroups: ["metrics.k8s.io"]
+          resources: ["nodes", "pods"]
+          verbs: ["get", "list"]
+        - apiGroups: ["project.openshift.io"]
+          resources: ["projects"]
+          verbs: ["get", "list", "watch"]
+  extraClusterRoleBindings:
+    - name: core-read
+      roleRef:
+        name: core-read

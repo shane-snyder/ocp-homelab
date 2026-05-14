@@ -326,6 +326,23 @@ applications:
     syncOptions:
       - CreateNamespace=true
 
+  # --- OpenShift MCP Server (sync-wave 10) ---
+  openshift-mcp-server:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/openshift-mcp-server
+      extraSourceFields: |
+        helm:
+          releaseName: openshift-mcp-server
+          valueFiles:
+            - values-openshift.yaml
+            - sno-mini-values.yaml
+    destination:
+      namespace: openshift-mcp-server
+    syncOptions:
+      - CreateNamespace=true
+
   # --- ArgoCD Agent repo secrets (sync-wave 14) ---
   argocd-agent-sno-mini:
     annotations:
