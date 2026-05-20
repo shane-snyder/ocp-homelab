@@ -6,6 +6,14 @@ metadata:
   name: local-cluster
 spec:
   clusterName: local-cluster
+  customize:
+    envVars:
+      # Required on Sensor as well as Central for global pull-secret registry integrations.
+      - name: ROX_AUTOGENERATE_GLOBAL_PULLSEC_REGISTRIES
+        value: 'true'
+  monitoring:
+    openshift:
+      enabled: true
   admissionControl:
     listenOnCreates: false
     listenOnEvents: true

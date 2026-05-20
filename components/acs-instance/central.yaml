@@ -10,6 +10,11 @@ spec:
     envVars:
       - name: ROX_ENABLE_OPENSHIFT_AUTH
         value: 'true'
+      # Autogenerate registry integrations from the OCP global pull secret
+      # (openshift-config/pull-secret) so platform images on quay.io/openshift-release-dev
+      # and registry.redhat.io can be scanned.
+      - name: ROX_AUTOGENERATE_GLOBAL_PULLSEC_REGISTRIES
+        value: 'true'
   central:
     exposure:
       loadBalancer:
