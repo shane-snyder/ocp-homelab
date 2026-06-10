@@ -140,3 +140,47 @@ data:
       - kube_node_labels
     collect_rules:
       - group: -SNOResourceUsage
+  # Remove every name/match from the default uwl_metrics_list (HyperShift HCP
+  # metrics we don't use). With the merged uwl names+matches list empty, the
+  # endpoint operator deletes the uwl-metrics-collector deployment, whose
+  # duplicate recording-rule pushes cause HTTP 409 out-of-order errors and the
+  # ACMUWLMetricsCollectorForwardRemoteWriteError alert.
+  uwl_metrics_list.yaml: |
+    names:
+      - "-ALERTS"
+      - "-apiserver_current_inflight_requests"
+      - "-apiserver_request_count"
+      - "-apiserver_request_duration_seconds_bucket"
+      - "-apiserver_request_total"
+      - "-apiserver_storage_objects"
+      - "-etcd_debugging_mvcc_db_total_size_in_bytes"
+      - "-etcd_mvcc_db_total_size_in_bytes"
+      - "-etcd_debugging_snap_save_total_duration_seconds_sum"
+      - "-etcd_disk_backend_commit_duration_seconds_bucket"
+      - "-etcd_disk_backend_commit_duration_seconds_sum"
+      - "-etcd_disk_wal_fsync_duration_seconds_bucket"
+      - "-etcd_disk_wal_fsync_duration_seconds_sum"
+      - "-etcd_object_counts"
+      - "-etcd_network_client_grpc_received_bytes_total"
+      - "-etcd_network_client_grpc_sent_bytes_total"
+      - "-etcd_network_peer_received_bytes_total"
+      - "-etcd_network_peer_sent_bytes_total"
+      - "-etcd_server_client_requests_total"
+      - "-etcd_server_has_leader"
+      - "-etcd_server_health_failures"
+      - "-etcd_server_leader_changes_seen_total"
+      - "-etcd_server_proposals_failed_total"
+      - "-etcd_server_proposals_pending"
+      - "-etcd_server_proposals_committed_total"
+      - "-etcd_server_proposals_applied_total"
+      - "-etcd_server_quota_backend_bytes"
+      - "-up"
+    matches:
+      - '-__name__="process_resident_memory_bytes",job=~"apiserver|etcd"'
+      - '-__name__="grpc_server_started_total",job="etcd"'
+      - '-__name__="grpc_server_handled_total",job="etcd"'
+      - '-__name__="go_goroutines",service="kubernetes"'
+      - '-__name__="process_cpu_seconds_total",service="kubernetes"'
+      - '-__name__="workqueue_adds_total",service="kubernetes"'
+      - '-__name__="workqueue_depth",service="kubernetes"'
+      - '-__name__="workqueue_queue_duration_seconds_bucket",service="kubernetes"'
