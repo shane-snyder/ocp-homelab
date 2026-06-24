@@ -8,7 +8,7 @@ metadata:
   namespace: rhel10-vm   # MUST match the namespace where the VM pods run
   annotations:
     argocd.argoproj.io/sync-wave: "20"
-    k8s.v1.cni.cncf.io/policy-for: vm-network/vlan100
+    k8s.v1.cni.cncf.io/policy-for: rhel10-vm/vlan100
 spec:
   podSelector: {}
   policyTypes:

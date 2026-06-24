@@ -1,7 +1,7 @@
 # vm-multinetworkpolicies
 
 Phase 3 of the "discover then lock down" workflow for CNV VMs on the
-`vm-network/vlan100` OVN-K localnet secondary network.
+`rhel10-vm/vlan100` OVN-K localnet secondary network.
 
 **Do not wire this into `clusters/sno/values.yaml` until discovery is complete.**
 Once the default-deny policy below is applied, every secondary-network flow that
@@ -10,9 +10,9 @@ isn't explicitly allowed is dropped. During Phase 2 (discovery) there should be
 all of it.
 
 **Namespace matters.** MultiNetworkPolicy resources select pods in their *own*
-namespace. The VM pods run in `rhel10-vm` (the NAD lives in `vm-network` and is
-referenced cross-namespace), so these policies live in `rhel10-vm`. If you add
-VMs in other namespaces, replicate the policies there too.
+namespace. The VM pods run in `rhel10-vm` and the NAD is co-located there (multus
+namespace isolation forbids cross-namespace NAD refs), so these policies live in
+`rhel10-vm`. If you add VMs in other namespaces, give each its own NAD + policies.
 
 ## Prerequisite: enable MultiNetworkPolicy cluster-wide
 
@@ -42,5 +42,5 @@ Network CR).
 4. Keep NetObserv running afterward as a regression detector.
 
 Every policy here targets the secondary network via the
-`k8s.v1.cni.cncf.io/policy-for: vm-network/vlan100` annotation. Without that
+`k8s.v1.cni.cncf.io/policy-for: rhel10-vm/vlan100` annotation. Without that
 annotation a MultiNetworkPolicy does nothing.

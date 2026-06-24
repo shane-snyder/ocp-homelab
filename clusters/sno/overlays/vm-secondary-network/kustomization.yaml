@@ -1,7 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# Cluster/node-level plumbing only: the OVS bridge mapping for the localnet
+# "vlan100" network. The NetworkAttachmentDefinition itself is co-located with
+# each consuming workload's namespace (e.g. components/rhel10-vm) because multus
+# namespace isolation forbids cross-namespace NAD references.
 resources:
-  - 001-namespace.yaml
   - 002-nncp-bridge-mapping.yaml
-  - 003-network-attachment-definition.yaml

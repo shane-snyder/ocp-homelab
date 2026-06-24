@@ -1,0 +1,29 @@
+# OVN-Kubernetes localnet secondary network, co-located with the VM.
+#
+# Multus namespace isolation (default on OpenShift) requires the NAD to live in
+# the same namespace as the consuming pod, so this is defined here rather than a
+# shared namespace. The node-level OVS bridge mapping for localnet "vlan100"
+# lives in clusters/sno/overlays/vm-secondary-network (cluster-scoped NNCP).
+#
+# `subnets` lets OVN-K do IPAM and enables podSelector/namespaceSelector peers in
+# MultiNetworkPolicy. Keep no external DHCP serving this range.
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vlan100
+  namespace: rhel10-vm
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  config: |
+    {
+      "cniVersion": "0.4.0",
+      "name": "vlan100",
+      "type": "ovn-k8s-cni-overlay",
+      "topology": "localnet",
+      "netAttachDefName": "rhel10-vm/vlan100",
+      "physicalNetworkName": "vlan100",
+      "vlanID": 100,
+      "subnets": "192.168.100.0/24",
+      "excludeSubnets": "192.168.100.1/32"
+    }

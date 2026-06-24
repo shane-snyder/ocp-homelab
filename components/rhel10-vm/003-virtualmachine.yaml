@@ -44,13 +44,12 @@ spec:
       networks:
         - name: default
           pod: {}
-        # Cross-namespace reference to the NAD in vm-network. NOTE: the VM pod
-        # runs in the rhel10-vm namespace, so MultiNetworkPolicy resources that
-        # select this VM must also live in rhel10-vm (annotated policy-for
-        # vm-network/vlan100), not in vm-network.
+        # Local NAD (004-network-attachment-definition.yaml). Must be in this
+        # namespace due to multus namespace isolation. MultiNetworkPolicy
+        # resources selecting this VM also live here (policy-for rhel10-vm/vlan100).
         - name: vlan100
           multus:
-            networkName: vm-network/vlan100
+            networkName: vlan100
       volumes:
         - dataVolume:
             name: rhel10-dnf-check-rootdisk

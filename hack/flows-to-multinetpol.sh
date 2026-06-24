@@ -14,7 +14,7 @@
 # Requires: oc (logged in, cluster-admin), curl, jq.
 #
 # Usage:
-#   ./hack/flows-to-multinetpol.sh vm-network 6h
+#   ./hack/flows-to-multinetpol.sh rhel10-vm 6h
 #
 set -euo pipefail
 

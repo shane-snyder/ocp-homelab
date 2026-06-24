@@ -5,3 +5,4 @@ resources:
   - 001-namespace.yaml
   - 002-external-secret.yaml
   - 003-virtualmachine.yaml
+  - 004-network-attachment-definition.yaml

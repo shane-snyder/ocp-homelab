@@ -25,7 +25,7 @@ spec:
   processor:
     advanced:
       secondaryNetworks:
-        - name: vm-network/vlan100
+        - name: rhel10-vm/vlan100
           index:
             - MAC
   loki:
