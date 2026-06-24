@@ -541,6 +541,15 @@ applications:
       namespace: rhel10-vm
     syncOptions:
       - CreateNamespace=true
+    # kubemacpool re-stamps this annotation on every apply once the VM has a
+    # secondary (bridge) interface, which otherwise keeps the app OutOfSync.
+    extraFields: |
+      ignoreDifferences:
+        - group: kubevirt.io
+          kind: VirtualMachine
+          name: rhel10-dnf-check
+          jsonPointers:
+            - /metadata/annotations/kubemacpool.io~1transaction-timestamp
 
   # --- OpenShift MCP Server (sync-wave 10) ---
   openshift-mcp-server:
