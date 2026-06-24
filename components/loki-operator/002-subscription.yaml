@@ -6,12 +6,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
-  # NOTE: Loki operator uses versioned channels (e.g. stable-6.0, stable-6.1).
-  # `stable` tracks the latest stable channel; pin to a stable-6.x if you want
-  # to control upgrades. Verify with:
+  # Loki operator only publishes versioned channels (no bare `stable`).
+  # stable-6.5 is the default channel as of OCP 4.19. Verify/upgrade with:
   #   oc get packagemanifest loki-operator -n openshift-marketplace \
-  #     -o jsonpath='{.status.channels[*].name}'
-  channel: stable
+  #     -o jsonpath='{.status.defaultChannel}{"\n"}{range .status.channels[*]}{.name}{"\n"}{end}'
+  channel: stable-6.5
   name: loki-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
