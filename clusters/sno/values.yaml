@@ -541,13 +541,13 @@ applications:
       namespace: rhel10-vm
     syncOptions:
       - CreateNamespace=true
-    # kubemacpool re-stamps this annotation on every apply once the VM has a
+    # kubemacpool re-stamps this annotation on every apply on any VM with a
     # secondary (bridge) interface, which otherwise keeps the app OutOfSync.
+    # No name => applies to all VirtualMachines in this app.
     extraFields: |
       ignoreDifferences:
         - group: kubevirt.io
           kind: VirtualMachine
-          name: rhel10-dnf-check
           jsonPointers:
             - /metadata/annotations/kubemacpool.io~1transaction-timestamp
 

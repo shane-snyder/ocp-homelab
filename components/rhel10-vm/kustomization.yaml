@@ -6,3 +6,5 @@ resources:
   - 002-external-secret.yaml
   - 003-virtualmachine.yaml
   - 004-network-attachment-definition.yaml
+  - 005-external-secret-peer.yaml
+  - 006-virtualmachine-peer.yaml
