@@ -1,0 +1,63 @@
+# EXAMPLE allow rule — replace with policies derived from NetObserv discovery.
+#
+# This template assumes VMs carry a `role` label on their pod template
+# (spec.template.metadata.labels) so podSelector peers work. Because the NAD
+# defines `subnets`, OVN-K knows each VM's IP and podSelector/namespaceSelector
+# peers are honored. If you bridged onto an external L2 without `subnets`, you'd
+# be limited to `ipBlock` peers instead.
+#
+# Pattern below: allow "app" VMs to reach "db" VMs on TCP/5432, and let DNS out.
+apiVersion: k8s.cni.cncf.io/v1beta1
+kind: MultiNetworkPolicy
+metadata:
+  name: vlan100-allow-app-to-db
+  namespace: rhel10-vm   # MUST match the namespace where the VM pods run
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    k8s.v1.cni.cncf.io/policy-for: vm-network/vlan100
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              role: app
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: k8s.cni.cncf.io/v1beta1
+kind: MultiNetworkPolicy
+metadata:
+  name: vlan100-allow-app-egress
+  namespace: rhel10-vm   # MUST match the namespace where the VM pods run
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    k8s.v1.cni.cncf.io/policy-for: vm-network/vlan100
+spec:
+  podSelector:
+    matchLabels:
+      role: app
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              role: db
+      ports:
+        - protocol: TCP
+          port: 5432
+    # DNS (adjust to your secondary-network resolver / CIDR)
+    - to:
+        - ipBlock:
+            cidr: 192.168.100.0/24
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

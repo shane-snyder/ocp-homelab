@@ -1,0 +1,24 @@
+# Loki backing store for NetObserv flows. 1x.demo is the smallest, single-
+# replica size — appropriate for SNO/homelab discovery work, NOT production.
+#
+# TODO(env): set storageClassName to a class that exists on this cluster
+# (the rhel10-vm DataVolume uses "lvms-dell").
+apiVersion: loki.grafana.com/v1
+kind: LokiStack
+metadata:
+  name: netobserv-loki
+  namespace: netobserv
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  size: 1x.demo
+  storage:
+    schemas:
+      - version: v13
+        effectiveDate: "2024-01-01"
+    secret:
+      name: netobserv-loki-s3
+      type: s3
+  storageClassName: lvms-dell
+  tenants:
+    mode: openshift-network

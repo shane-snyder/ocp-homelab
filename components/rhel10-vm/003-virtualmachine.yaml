@@ -13,6 +13,9 @@ spec:
     metadata:
       labels:
         kubevirt.io/domain: rhel10-dnf-check
+        # role label drives MultiNetworkPolicy podSelector matching once policies
+        # are authored from discovery (Phase 3).
+        role: app
     spec:
       domain:
         cpu:
@@ -30,6 +33,10 @@ spec:
           interfaces:
             - masquerade: {}
               name: default
+            # Secondary interface on the OVN-K localnet network. OVN-K assigns
+            # the IP from the NAD's subnet (IPAM), so no static config needed.
+            - bridge: {}
+              name: vlan100
           rng: {}
         resources:
           requests:
@@ -37,6 +44,13 @@ spec:
       networks:
         - name: default
           pod: {}
+        # Cross-namespace reference to the NAD in vm-network. NOTE: the VM pod
+        # runs in the rhel10-vm namespace, so MultiNetworkPolicy resources that
+        # select this VM must also live in rhel10-vm (annotated policy-for
+        # vm-network/vlan100), not in vm-network.
+        - name: vlan100
+          multus:
+            networkName: vm-network/vlan100
       volumes:
         - dataVolume:
             name: rhel10-dnf-check-rootdisk

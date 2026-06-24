@@ -1,0 +1,38 @@
+# Cluster-wide flow collector. The two settings that make VM secondary-network
+# traffic visible AND attributable are:
+#   - agent.ebpf.privileged: true     -> agent can read non-host netns where
+#                                        VM secondary interfaces live.
+#   - processor.advanced.secondaryNetworks -> maps the NAD to an index field so
+#                                        flows are enriched with the VM/pod
+#                                        instead of an anonymous MAC.
+#
+# sampling: 1 captures every flow — ideal for discovery, heavier on resources.
+# Raise it (default 50) once policies are authored and you only need spot checks.
+apiVersion: flows.netobserv.io/v1beta2
+kind: FlowCollector
+metadata:
+  name: cluster
+  annotations:
+    argocd.argoproj.io/sync-wave: "11"
+spec:
+  namespace: netobserv
+  deploymentModel: Direct
+  agent:
+    type: eBPF
+    ebpf:
+      privileged: true
+      sampling: 1
+  processor:
+    advanced:
+      secondaryNetworks:
+        - name: vm-network/vlan100
+          index:
+            - MAC
+  loki:
+    enable: true
+    mode: LokiStack
+    lokiStack:
+      name: netobserv-loki
+      namespace: netobserv
+  consolePlugin:
+    enable: true

@@ -1,0 +1,26 @@
+# Maps the OVN-K localnet "physicalNetworkName" (vlan100, see the NAD) to an
+# OVS bridge so secondary-network traffic can reach the physical fabric.
+#
+# This reuses br-ex (the default OVN external/uplink bridge), so VM secondary
+# traffic shares the node's primary NIC but is isolated onto VLAN 100 (tagged
+# by the NAD's vlanID). If you have a dedicated NIC for VM traffic, create a
+# separate OVS bridge here with that port instead and point `bridge:` at it.
+#
+# TODO(env): confirm the bridge name (`oc get nncp`/`oc get nns -o yaml` shows
+# the current node network state) and the VLAN id match your fabric.
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: vm-localnet-bridge-mapping
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+spec:
+  # SNO node carries both master+worker roles; this selector matches it.
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
+  desiredState:
+    ovn:
+      bridge-mappings:
+        - localnet: vlan100
+          bridge: br-ex
+          state: present

@@ -1,0 +1,13 @@
+# WARNING: This server-side-applies useMultiNetworkPolicy onto the cluster
+# singleton Network operator CR. Toggling it restarts multus/OVN pods. Only
+# include this in the kustomization (and rename off .disabled) if you want the
+# flag managed by GitOps; otherwise run the one-line `oc patch` in README.md.
+#
+# Requires ServerSideApply=true on the Argo CD Application (already the repo
+# default) so Argo manages only this field, not the whole CR.
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  useMultiNetworkPolicy: true

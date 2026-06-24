@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# NOTE: policies here are namespaced to rhel10-vm (where the VM pods run).
+# NOTE: 000-enable-multinetworkpolicy.yaml.disabled is intentionally excluded.
+# Enable MultiNetworkPolicy via `oc patch` (see README.md), or rename that file
+# and add it here to manage the flag via GitOps.
+resources:
+  - 010-default-deny.yaml
+  - 020-allow-example.yaml

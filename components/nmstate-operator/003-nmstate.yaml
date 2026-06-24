@@ -1,0 +1,9 @@
+# Singleton CR that tells the operator to deploy the nmstate-handler
+# DaemonSet. NodeNetworkConfigurationPolicy resources are only reconciled
+# once this is Running.
+apiVersion: nmstate.io/v1
+kind: NMState
+metadata:
+  name: nmstate
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"

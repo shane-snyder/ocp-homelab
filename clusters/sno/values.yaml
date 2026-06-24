@@ -351,6 +351,70 @@ applications:
     destination:
       namespace: openshift-cnv
 
+  # --- NMState Operator (sync-wave 5) ---
+  # Drives the OVS bridge mapping (NodeNetworkConfigurationPolicy) for the
+  # VM secondary network.
+  nmstate-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/nmstate-operator
+    destination:
+      namespace: openshift-nmstate
+
+  # --- Loki Operator (sync-wave 5) ---
+  # Backing store for NetObserv flows.
+  loki-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/loki-operator
+    destination:
+      namespace: openshift-operators-redhat
+
+  # --- Network Observability Operator (sync-wave 5) ---
+  network-observability-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/network-observability-operator
+    destination:
+      namespace: openshift-netobserv-operator
+
+  # --- VM Secondary Network: NAD + OVS bridge mapping (sync-wave 7) ---
+  vm-secondary-network:
+    annotations:
+      argocd.argoproj.io/sync-wave: "7"
+    source:
+      path: clusters/sno/overlays/vm-secondary-network
+    destination:
+      namespace: vm-network
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- Network Observability: LokiStack + FlowCollector (sync-wave 10) ---
+  network-observability:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: clusters/sno/overlays/network-observability
+    destination:
+      namespace: netobserv
+    syncOptions:
+      - CreateNamespace=true
+
+  # --- VM MultiNetworkPolicies (Phase 3 — intentionally NOT enabled) ---
+  # Uncomment ONLY after discovery is complete and allow-* rules are authored.
+  # Applying default-deny without allows will blackhole VM secondary traffic.
+  # Also requires `useMultiNetworkPolicy: true` on the cluster Network CR.
+  # vm-multinetworkpolicies:
+  #   annotations:
+  #     argocd.argoproj.io/sync-wave: "20"
+  #   source:
+  #     path: components/vm-multinetworkpolicies
+  #   destination:
+  #     namespace: rhel10-vm
+
   # --- Power Monitoring (sync-wave 10) ---
   power-monitoring:
     annotations:

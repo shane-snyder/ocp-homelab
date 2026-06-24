@@ -1,0 +1,16 @@
+# Default-deny for the vlan100 secondary network. Selecting all pods with an
+# empty podSelector flips the NAD from "allow all" to "deny all" for both
+# directions. Pair this with explicit allow-* policies in the SAME commit.
+apiVersion: k8s.cni.cncf.io/v1beta1
+kind: MultiNetworkPolicy
+metadata:
+  name: vlan100-default-deny
+  namespace: rhel10-vm   # MUST match the namespace where the VM pods run
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    k8s.v1.cni.cncf.io/policy-for: vm-network/vlan100
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress

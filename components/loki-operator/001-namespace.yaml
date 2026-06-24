@@ -1,0 +1,10 @@
+# openshift-operators-redhat is the canonical home for Red Hat layered
+# operators (Loki, etc.). Safe to (re)declare; apply is idempotent.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-operators-redhat
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    openshift.io/cluster-monitoring: "true"
