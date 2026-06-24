@@ -22,6 +22,12 @@ spec:
     ebpf:
       privileged: true
       sampling: 1
+      # PacketDrop: report dropped packets + cause. NetworkEvents: correlate each
+      # flow to the (Multi)NetworkPolicy that allowed/denied it -> the feedback
+      # signal for "what would default-deny break" and for catching missed rules.
+      features:
+        - PacketDrop
+        - NetworkEvents
   processor:
     advanced:
       secondaryNetworks:
