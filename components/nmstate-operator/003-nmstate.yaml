@@ -7,3 +7,6 @@ metadata:
   name: nmstate
   annotations:
     argocd.argoproj.io/sync-wave: "4"
+    # CRD is installed by the operator (earlier wave) within this same app, so
+    # skip the dry-run that would otherwise fail before the CRD exists.
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
