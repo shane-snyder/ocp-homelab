@@ -7,7 +7,13 @@ placementBindingDefaults:
 policyDefaults:
   namespace: open-cluster-management-global-set
   remediationAction: enforce
-  complianceType: "mustonlyhave"
+  # musthave (not mustonlyhave): the spoke chart contains Services, a
+  # Deployment and Secrets with server-populated fields (clusterIP,
+  # ipFamilies, defaulted spec, etc.). With mustonlyhave the controller
+  # tries to strip those every cycle, the dry-run update changes nothing,
+  # and it loops forever (~15 cores). Argo CD on the spoke enforces exact
+  # state anyway, so musthave (ensure present, tolerate extras) is correct.
+  complianceType: "musthave"
 policies:
   - name: argocd-agent
     description: Argo CD Agent TLS Secrets

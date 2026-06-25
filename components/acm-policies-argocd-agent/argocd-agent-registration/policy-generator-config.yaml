@@ -5,7 +5,10 @@ metadata:
 placementBindingDefaults:
   name: argocd-agent-registration
 policyDefaults:
-  complianceType: "mustonlyhave"
+  # musthave: avoids mustonlyhave phantom-mismatch loops on objects with
+  # server-managed fields (Issuers/Certificates, ArgoCD cluster Secrets,
+  # bare Namespaces). Raw object-templates set their own complianceType.
+  complianceType: "musthave"
   consolidateManifests: false
   namespace: open-cluster-management-global-set
   remediationAction: enforce
