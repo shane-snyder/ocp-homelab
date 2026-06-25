@@ -1,12 +1,12 @@
-apiVersion: project.openshift.io/v1
-kind: Project
+# Namespace, not Project: project.openshift.io/v1 Project does not support
+# the watch verb, so config-policy-controller's dependency-watch fails on
+# every reconcile ("watch not supported on this resource") and leaks
+# watcher state. A Namespace is the watchable equivalent (a Project named X
+# is backed by Namespace X).
+apiVersion: v1
+kind: Namespace
 metadata:
-  labels:
-    kubernetes.io/metadata.name: openshift-gitops-operator
   name: openshift-gitops-operator
-spec:
-  finalizers:
-    - kubernetes
 ---
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
