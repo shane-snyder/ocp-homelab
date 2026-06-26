@@ -46,4 +46,4 @@ spec:
   schedule: 00 07 * * 1-5
   successfulJobsHistoryLimit: 3
   suspend: false
-  timeZone: America/New_York
+  timeZone: America/Phoenix
