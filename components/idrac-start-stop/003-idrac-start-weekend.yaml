@@ -43,7 +43,7 @@ spec:
   schedule: 30 6 * * 0,6
   successfulJobsHistoryLimit: 3
   suspend: false
-  timeZone: America/Phoenix
+  timeZone: America/New_York
   concurrencyPolicy: Allow
   failedJobsHistoryLimit: 1
 
