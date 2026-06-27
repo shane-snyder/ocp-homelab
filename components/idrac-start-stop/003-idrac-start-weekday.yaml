@@ -24,16 +24,16 @@ spec:
                 secretKeyRef:
                   name: idrac-secret
                   key: IDRAC_HOST
+            - name: IDRAC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: idrac-secret
+                  key: IDRAC_PASSWORD
             - name: IDRAC_USER
               valueFrom:
                 secretKeyRef:
                   name: idrac-secret
                   key: IDRAC_USER
-            - name: IDRAC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: IDRAC_PASSWORD
-                  name: idrac-secret
             image: quay-server.apps.sno-mini.shanehomelab.com/containers/ipmitool:latest
             imagePullPolicy: IfNotPresent
             name: set-fan-speed-60
