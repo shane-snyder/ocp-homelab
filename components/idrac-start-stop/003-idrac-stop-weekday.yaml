@@ -69,6 +69,6 @@ spec:
   schedule: 00 23 * * 1-5
   successfulJobsHistoryLimit: 3
   suspend: false
-  timeZone: America/Phoenix
+  timeZone: America/New_York
   concurrencyPolicy: Allow
   failedJobsHistoryLimit: 1
