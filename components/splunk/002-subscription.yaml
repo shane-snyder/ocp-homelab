@@ -9,8 +9,8 @@ metadata:
   namespace: splunk
 spec:
   channel: stable
-  installPlanApproval: Automatic
+  installPlanApproval: Manual
   name: splunk-operator
   source: certified-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: splunk-operator.v2.8.1
+  startingCSV: splunk-operator.v3.0.0
