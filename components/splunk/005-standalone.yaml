@@ -13,3 +13,12 @@ spec:
     storageClassName: lvms-dell
     storageCapacity: 10Gi
   serviceAccount: splunk
+  extraEnv:
+    - name: SPLUNK_GENERAL_TERMS
+      value: "--accept-sgt-current-at-splunk-com"
+  defaults: |
+    splunk:
+      conf:
+        server:
+          general:
+            allowRemoteLogin: always
