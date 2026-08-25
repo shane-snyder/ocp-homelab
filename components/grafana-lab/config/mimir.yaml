@@ -71,6 +71,14 @@ store_gateway:
   sharding_ring:
     replication_factor: 1
 
+ruler:
+  # Local scratch directory the ruler materialises rule files into, distinct
+  # from ruler_storage below. Its default is the relative path ./data-ruler/,
+  # which resolves against the container working directory - not writable by
+  # the arbitrary UID OpenShift assigns, so Mimir's startup sanity check fails
+  # the whole process before any module starts.
+  rule_path: /data/ruler
+
 ruler_storage:
   backend: filesystem
   filesystem:
