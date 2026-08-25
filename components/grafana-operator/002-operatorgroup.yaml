@@ -1,0 +1,10 @@
+# AllNamespaces install mode (empty spec) so the operator can reconcile Grafana,
+# GrafanaDatasource and GrafanaDashboard CRs in grafana-lab.
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: grafana-operator
+  namespace: grafana-operator
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec: {}

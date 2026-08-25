@@ -1,0 +1,38 @@
+# Lets the Grafana instance query the in-cluster Thanos Querier, which is where
+# the sizing metrics live (kubelet_volume_stats_*, cortex_*, loki_*,
+# otelcol_*). Long-lived token because Grafana datasources need a static
+# bearer value.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana-monitoring-reader
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: grafana-lab-monitoring-reader
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-monitoring-view
+subjects:
+  - kind: ServiceAccount
+    name: grafana-monitoring-reader
+    namespace: grafana-lab
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-monitoring-reader-token
+  namespace: grafana-lab
+  annotations:
+    kubernetes.io/service-account.name: grafana-monitoring-reader
+    argocd.argoproj.io/sync-wave: "2"
+    # The token is minted by the controller, not by git.
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+type: kubernetes.io/service-account-token

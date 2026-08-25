@@ -1,0 +1,105 @@
+# One ServiceAccount for both collectors. The node collector needs the
+# privileged SCC (hostPath onto /var/log/pods and the host root filesystem);
+# the cluster collector only needs the API permissions, but sharing the SA
+# keeps the two collectors' resource attributes identical, which matters
+# because differing attributes would change the series they produce.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: grafana-lab-otel-collector
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+rules:
+  # k8sattributes + k8s_cluster + k8s_events
+  - apiGroups: [""]
+    resources:
+      - events
+      - namespaces
+      - namespaces/status
+      - nodes
+      - nodes/spec
+      - pods
+      - pods/status
+      - replicationcontrollers
+      - replicationcontrollers/status
+      - resourcequotas
+      - services
+      - persistentvolumes
+      - persistentvolumeclaims
+    verbs: [get, list, watch]
+  - apiGroups: ["apps"]
+    resources: [daemonsets, deployments, replicasets, statefulsets]
+    verbs: [get, list, watch]
+  - apiGroups: ["extensions"]
+    resources: [daemonsets, deployments, replicasets]
+    verbs: [get, list, watch]
+  - apiGroups: ["batch"]
+    resources: [jobs, cronjobs]
+    verbs: [get, list, watch]
+  - apiGroups: ["autoscaling"]
+    resources: [horizontalpodautoscalers]
+    verbs: [get, list, watch]
+  - apiGroups: ["events.k8s.io"]
+    resources: [events]
+    verbs: [get, list, watch]
+  - apiGroups: ["quota.openshift.io"]
+    resources: [clusterresourcequotas]
+    verbs: [get, list, watch]
+  # resourcedetection, detector "openshift"
+  - apiGroups: ["config.openshift.io"]
+    resources: [infrastructures, infrastructures/status]
+    verbs: [get, watch, list]
+  # kubeletstats talks to the kubelet's authenticated /stats/summary
+  - apiGroups: [""]
+    resources: [nodes/stats, nodes/proxy, nodes/metrics]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: grafana-lab-otel-collector
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: grafana-lab-otel-collector
+subjects:
+  - kind: ServiceAccount
+    name: otel-collector
+    namespace: grafana-lab
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: grafana-lab-otel-privileged-scc
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+rules:
+  - apiGroups: [security.openshift.io]
+    resources: [securitycontextconstraints]
+    resourceNames: [privileged]
+    verbs: [use]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: grafana-lab-otel-privileged-scc
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: grafana-lab-otel-privileged-scc
+subjects:
+  - kind: ServiceAccount
+    name: otel-collector
+    namespace: grafana-lab

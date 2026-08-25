@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki
+  namespace: grafana-lab
+  labels:
+    app.kubernetes.io/part-of: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 30s
+    - port: du-metrics
+      path: /metrics
+      interval: 60s

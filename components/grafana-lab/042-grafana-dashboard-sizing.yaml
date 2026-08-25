@@ -1,0 +1,1473 @@
+# The dashboard that answers the actual question. Every panel reads from the
+# cluster's own Thanos, not from Loki or Mimir - measuring a store with itself
+# would make the measurement part of what is being measured.
+#
+# Generated content: edit in Grafana, then export the JSON back into this file.
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: telemetry-storage-sizing
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "16"
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana-lab
+  resyncPeriod: 5m
+  json: |
+    {
+      "uid": "grafana-lab-sizing",
+      "title": "Telemetry storage sizing",
+      "description": "Per-ingest-path storage cost: OTel logs, OTel metrics, and Prometheus remote_write metrics, measured on disk rather than estimated.",
+      "tags": [
+        "grafana-lab",
+        "sizing",
+        "opentelemetry"
+      ],
+      "timezone": "browser",
+      "editable": true,
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "1m",
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "On disk right now",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Metrics - OTel (OTLP)",
+          "description": "Bytes on disk for this ingest path, measured by walking the directory tree - not an estimate from sample counts.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 1,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"otlp\",namespace=\"grafana-lab\"}",
+              "refId": "A",
+              "legendFormat": "Metrics - OTel (OTLP)",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "justifyMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Metrics - Prometheus RW",
+          "description": "Bytes on disk for this ingest path, measured by walking the directory tree - not an estimate from sample counts.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 6,
+            "y": 1,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"remotewrite\",namespace=\"grafana-lab\"}",
+              "refId": "A",
+              "legendFormat": "Metrics - Prometheus RW",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "justifyMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Logs - OTel (chunks)",
+          "description": "Bytes on disk for this ingest path, measured by walking the directory tree - not an estimate from sample counts.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 1,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "telemetry_lab_scope_bytes{component=\"loki\",scope=\"chunks\",namespace=\"grafana-lab\"}",
+              "refId": "A",
+              "legendFormat": "Logs - OTel (chunks)",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "justifyMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Logs - OTel (index)",
+          "description": "Bytes on disk for this ingest path, measured by walking the directory tree - not an estimate from sample counts.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 18,
+            "y": 1,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "telemetry_lab_scope_bytes{component=\"loki\",scope=\"index\",namespace=\"grafana-lab\"}",
+              "refId": "A",
+              "legendFormat": "Logs - OTel (index)",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "justifyMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 6,
+          "type": "row",
+          "title": "Growth rate (24h linear fit)",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 5,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 7,
+          "type": "stat",
+          "title": "Metrics - OTel (OTLP) / day",
+          "description": "deriv() over 24h scaled to a day. Needs a full 24h of data before it means anything; before that use the 6h variant.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 6,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"otlp\",namespace=\"grafana-lab\"}[24h]) * 86400",
+              "refId": "A",
+              "legendFormat": "Metrics - OTel (OTLP) / day",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "justifyMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 8,
+          "type": "stat",
+          "title": "Metrics - Prometheus RW / day",
+          "description": "deriv() over 24h scaled to a day. Needs a full 24h of data before it means anything; before that use the 6h variant.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 6,
+            "y": 6,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"remotewrite\",namespace=\"grafana-lab\"}[24h]) * 86400",
+              "refId": "A",
+              "legendFormat": "Metrics - Prometheus RW / day",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "justifyMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 9,
+          "type": "stat",
+          "title": "Logs - OTel (chunks) / day",
+          "description": "deriv() over 24h scaled to a day. Needs a full 24h of data before it means anything; before that use the 6h variant.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 6,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_scope_bytes{component=\"loki\",scope=\"chunks\",namespace=\"grafana-lab\"}[24h]) * 86400",
+              "refId": "A",
+              "legendFormat": "Logs - OTel (chunks) / day",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "justifyMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 10,
+          "type": "stat",
+          "title": "Logs - OTel (index) / day",
+          "description": "deriv() over 24h scaled to a day. Needs a full 24h of data before it means anything; before that use the 6h variant.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 18,
+            "y": 6,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_scope_bytes{component=\"loki\",scope=\"index\",namespace=\"grafana-lab\"}[24h]) * 86400",
+              "refId": "A",
+              "legendFormat": "Logs - OTel (index) / day",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "justifyMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 11,
+          "type": "row",
+          "title": "Accumulation and projection",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 10,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 12,
+          "type": "timeseries",
+          "title": "On-disk bytes over time",
+          "description": "The raw curve everything else is derived from. A straight line means the projection is trustworthy; a knee means something changed.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 11,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"otlp\",namespace=\"grafana-lab\"}",
+              "refId": "A",
+              "legendFormat": "Metrics - OTel (OTLP)",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"remotewrite\",namespace=\"grafana-lab\"}",
+              "refId": "B",
+              "legendFormat": "Metrics - Prometheus RW",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "telemetry_lab_scope_bytes{component=\"loki\",scope=\"chunks\",namespace=\"grafana-lab\"}",
+              "refId": "C",
+              "legendFormat": "Logs - OTel (chunks)",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "telemetry_lab_scope_bytes{component=\"loki\",scope=\"index\",namespace=\"grafana-lab\"}",
+              "refId": "D",
+              "legendFormat": "Logs - OTel (index)",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 13,
+          "type": "bargauge",
+          "title": "Projected 30-day steady-state size",
+          "description": "Growth rate x 30. Valid only while retention has not yet started evicting - after that the curve flattens at the real steady state.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 11,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"otlp\",namespace=\"grafana-lab\"}[24h]) * 86400 * 30",
+              "refId": "A",
+              "legendFormat": "Metrics - OTel (OTLP)",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"remotewrite\",namespace=\"grafana-lab\"}[24h]) * 86400 * 30",
+              "refId": "B",
+              "legendFormat": "Metrics - Prometheus RW",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_scope_bytes{component=\"loki\",scope=\"chunks\",namespace=\"grafana-lab\"}[24h]) * 86400 * 30",
+              "refId": "C",
+              "legendFormat": "Logs - OTel (chunks)",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_scope_bytes{component=\"loki\",scope=\"index\",namespace=\"grafana-lab\"}[24h]) * 86400 * 30",
+              "refId": "D",
+              "legendFormat": "Logs - OTel (index)",
+              "instant": true,
+              "range": false,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "showUnfilled": true,
+            "valueMode": "color",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "min": 0,
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 14,
+          "type": "row",
+          "title": "Why the two metric paths differ",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 19,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 15,
+          "type": "timeseries",
+          "title": "Active series per tenant",
+          "description": "Series count is the first-order driver of TSDB size: every series pays an index cost regardless of how many samples it carries.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 20,
+            "w": 8,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "sum by (user) (cortex_ingester_active_series{namespace=\"grafana-lab\"})",
+              "refId": "A",
+              "legendFormat": "{{user}}",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 16,
+          "type": "timeseries",
+          "title": "Samples/s per tenant",
+          "description": "Accepted samples per second, per path.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 8,
+            "y": 20,
+            "w": 8,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "sum by (user) (rate(cortex_distributor_received_samples_total{namespace=\"grafana-lab\"}[5m]))",
+              "refId": "A",
+              "legendFormat": "{{user}}",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 17,
+          "type": "timeseries",
+          "title": "Bytes per sample per tenant",
+          "description": "The transferable number: multiply a workload's samples/s by this, and by the replication factor, to size its backend independently of how big this lab happens to be.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 16,
+            "y": 20,
+            "w": 8,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"otlp\",namespace=\"grafana-lab\"}[6h]) / clamp_min(sum(rate(cortex_distributor_received_samples_total{user=\"otlp\",namespace=\"grafana-lab\"}[6h])), 0.001)",
+              "refId": "A",
+              "legendFormat": "otlp",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "deriv(telemetry_lab_dir_bytes{component=\"mimir\",scope=\"blocks\",dir=\"remotewrite\",namespace=\"grafana-lab\"}[6h]) / clamp_min(sum(rate(cortex_distributor_received_samples_total{user=\"remotewrite\",namespace=\"grafana-lab\"}[6h])), 0.001)",
+              "refId": "B",
+              "legendFormat": "remotewrite",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 18,
+          "type": "row",
+          "title": "Log volume and compression",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 28,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 19,
+          "type": "timeseries",
+          "title": "Loki ingest, uncompressed",
+          "description": "Bytes of log payload arriving at Loki before compression.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 29,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "sum(rate(loki_distributor_bytes_received_total{namespace=\"grafana-lab\"}[5m]))",
+              "refId": "A",
+              "legendFormat": "bytes/s received",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 20,
+          "type": "timeseries",
+          "title": "Effective compression ratio",
+          "description": "Uncompressed bytes in, divided by bytes actually landing on disk. This is what turns a raw log volume into a disk number.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 29,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "clamp_min(sum(rate(loki_distributor_bytes_received_total{namespace=\"grafana-lab\"}[6h])), 0.001) / clamp_min(deriv(telemetry_lab_scope_bytes{component=\"loki\",scope=\"chunks\",namespace=\"grafana-lab\"}[6h]), 0.001)",
+              "refId": "A",
+              "legendFormat": "received / stored",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 21,
+          "type": "row",
+          "title": "Trust checks - read these before trusting anything above",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 37,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 22,
+          "type": "timeseries",
+          "title": "Discarded samples (Mimir) and dropped log lines (Loki)",
+          "description": "Anything non-zero here means the backend is refusing data and every size number below it is an undercount. Usually a limits_config ceiling.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 38,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "sum by (user, reason) (rate(cortex_discarded_samples_total{namespace=\"grafana-lab\"}[5m]))",
+              "refId": "A",
+              "legendFormat": "mimir {{user}} / {{reason}}",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "sum by (reason) (rate(loki_discarded_samples_total{namespace=\"grafana-lab\"}[5m]))",
+              "refId": "B",
+              "legendFormat": "loki / {{reason}}",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 23,
+          "type": "timeseries",
+          "title": "Collector export failures",
+          "description": "The other half of the ledger: data that never left the sender.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 38,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "sum by (exporter) (rate(otelcol_exporter_send_failed_metric_points_total{namespace=\"grafana-lab\"}[5m]))",
+              "refId": "A",
+              "legendFormat": "metrics {{exporter}}",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "sum by (exporter) (rate(otelcol_exporter_send_failed_log_records_total{namespace=\"grafana-lab\"}[5m]))",
+              "refId": "B",
+              "legendFormat": "logs {{exporter}}",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "sum(rate(prometheus_remote_storage_samples_failed_total{namespace=\"openshift-monitoring\"}[5m]))",
+              "refId": "C",
+              "legendFormat": "platform prometheus remote_write",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 24,
+          "type": "row",
+          "title": "Underlying volumes",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 46,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 25,
+          "type": "timeseries",
+          "title": "PVC used bytes",
+          "description": "Whole-PVC totals, including WAL and working directories. Always larger than the per-path numbers above, which count durable data only.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 47,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "kubelet_volume_stats_used_bytes{namespace=\"grafana-lab\"}",
+              "refId": "A",
+              "legendFormat": "{{persistentvolumeclaim}}",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 26,
+          "type": "timeseries",
+          "title": "PVC capacity headroom",
+          "description": "Watch this: a PVC filling up stops ingest and silently ends the test.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "openshift-thanos"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 47,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "openshift-thanos"
+              },
+              "expr": "kubelet_volume_stats_available_bytes{namespace=\"grafana-lab\"}",
+              "refId": "A",
+              "legendFormat": "{{persistentvolumeclaim}} available",
+              "instant": false,
+              "range": true,
+              "editorMode": "code"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisLabel": "",
+                "gradientMode": "opacity"
+              }
+            },
+            "overrides": []
+          }
+        }
+      ],
+      "templating": {
+        "list": []
+      },
+      "annotations": {
+        "list": []
+      }
+    }

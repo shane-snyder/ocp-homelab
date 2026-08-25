@@ -1,0 +1,142 @@
+# Five datasources, three of them pointed at the same Mimir with a different
+# X-Scope-OrgID. That header is the whole separation mechanism: it decides which
+# tenant a query reads, exactly as it decided which tenant a write landed in.
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: mimir-otlp
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana-lab
+  datasource:
+    uid: mimir-otlp
+    name: Mimir - OTLP (OpenTelemetry)
+    type: prometheus
+    access: proxy
+    url: http://mimir.grafana-lab.svc.cluster.local:8080/prometheus
+    isDefault: false
+    jsonData:
+      httpMethod: POST
+      prometheusType: Mimir
+      timeInterval: 30s
+      httpHeaderName1: X-Scope-OrgID
+    secureJsonData:
+      httpHeaderValue1: otlp
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: mimir-remotewrite
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana-lab
+  datasource:
+    uid: mimir-remotewrite
+    name: Mimir - Prometheus remote_write
+    type: prometheus
+    access: proxy
+    url: http://mimir.grafana-lab.svc.cluster.local:8080/prometheus
+    isDefault: false
+    jsonData:
+      httpMethod: POST
+      prometheusType: Mimir
+      timeInterval: 30s
+      httpHeaderName1: X-Scope-OrgID
+    secureJsonData:
+      httpHeaderValue1: remotewrite
+---
+# Cross-tenant reads, enabled by tenant_federation in the Mimir config. Use
+# this one to answer "did both paths actually see the same metric?".
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: mimir-both-tenants
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana-lab
+  datasource:
+    uid: mimir-both
+    name: Mimir - both tenants
+    type: prometheus
+    access: proxy
+    url: http://mimir.grafana-lab.svc.cluster.local:8080/prometheus
+    isDefault: false
+    jsonData:
+      httpMethod: POST
+      prometheusType: Mimir
+      timeInterval: 30s
+      httpHeaderName1: X-Scope-OrgID
+    secureJsonData:
+      httpHeaderValue1: otlp|remotewrite
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: loki-otlp
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana-lab
+  datasource:
+    uid: loki-otlp
+    name: Loki - OTLP logs
+    type: loki
+    access: proxy
+    url: http://loki.grafana-lab.svc.cluster.local:3100
+    isDefault: false
+    jsonData:
+      timeout: 60
+      maxLines: 1000
+---
+# The sizing metrics themselves (kubelet_volume_stats_*, cortex_*, loki_*,
+# otelcol_*, telemetry_lab_*) are scraped by the cluster's own monitoring, not
+# by anything in this namespace. Default datasource because every panel on the
+# sizing dashboard reads from here.
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: openshift-thanos
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana-lab
+  valuesFrom:
+    - targetPath: secureJsonData.httpHeaderValue1
+      valueFrom:
+        secretKeyRef:
+          name: grafana-monitoring-reader-token
+          key: token
+  datasource:
+    uid: openshift-thanos
+    name: OpenShift Monitoring (Thanos)
+    type: prometheus
+    access: proxy
+    url: https://thanos-querier.openshift-monitoring.svc.cluster.local:9091
+    isDefault: true
+    jsonData:
+      httpMethod: POST
+      prometheusType: Thanos
+      timeInterval: 30s
+      tlsSkipVerify: true
+      httpHeaderName1: Authorization
+    secureJsonData:
+      httpHeaderValue1: "Bearer ${token}"

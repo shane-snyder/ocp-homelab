@@ -1,0 +1,70 @@
+# Loki, monolithic single-process, filesystem-backed. Receives OTLP logs from
+# the OTel collectors at POST /otlp/v1/logs.
+#
+# Single tenant (auth_enabled: false) because there is only one log path in
+# this comparison - the split that matters for logs is chunks vs index, which
+# the du-exporter sidecar reports separately.
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: info
+  grpc_server_max_recv_msg_size: 104857600
+  grpc_server_max_send_msg_size: 104857600
+
+common:
+  path_prefix: /loki
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+
+schema_config:
+  configs:
+    - from: "2026-01-01"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /loki/tsdb-index
+    cache_location: /loki/tsdb-cache
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem
+  compaction_interval: 10m
+
+limits_config:
+  allow_structured_metadata: true
+  # Required for the bytes-per-stream sizing queries (/loki/api/v1/index/volume).
+  volume_enabled: true
+  # Match Mimir's 30d so log and metric projections share a retention basis.
+  retention_period: 720h
+  # Collectors start at the tail of each file, but a collector restart can still
+  # replay slightly stale entries; dropping them would understate volume.
+  reject_old_samples: false
+  ingestion_rate_mb: 64
+  ingestion_burst_size_mb: 128
+  max_global_streams_per_user: 50000
+  per_stream_rate_limit: 32MB
+  per_stream_rate_limit_burst: 64MB
+
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+
+analytics:
+  reporting_enabled: false

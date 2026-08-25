@@ -1,0 +1,97 @@
+# Mimir, monolithic single-process ("target: all"), filesystem-backed.
+#
+# Two tenants land here, one per ingest path, so the same TSDB engine and the
+# same retention apply to both and the storage numbers are directly comparable:
+#
+#   otlp        <- OTel collectors, POST /otlp/v1/metrics
+#   remotewrite <- platform Prometheus, POST /api/v1/push
+#
+# NOT a production topology: replication_factor 1, no HA, local disk instead of
+# object storage. That is deliberate - a single ingester writing one copy is
+# what makes "bytes on disk" mean "bytes per sample ingested". Multiply by the
+# real replication factor (3 in Grafana Cloud / a real Mimir) when projecting.
+target: all
+multitenancy_enabled: true
+
+usage_stats:
+  enabled: false
+
+server:
+  http_listen_port: 8080
+  grpc_listen_port: 9095
+  log_level: info
+  # Platform Prometheus here carries ~900k active series; remote_write batches
+  # get large and the default 4MB gRPC frame is not enough internally.
+  grpc_server_max_recv_msg_size: 104857600
+  grpc_server_max_send_msg_size: 104857600
+
+activity_tracker:
+  # Default is ./metrics-activity.log in the (read-only) working directory.
+  filepath: /data/metrics-activity.log
+
+common:
+  storage:
+    backend: filesystem
+    filesystem:
+      dir: /data/common
+
+blocks_storage:
+  backend: filesystem
+  filesystem:
+    dir: /data/blocks
+  bucket_store:
+    sync_dir: /data/tsdb-sync
+  tsdb:
+    dir: /data/tsdb
+    # How long compacted blocks stay on the ingester after being shipped to the
+    # "bucket". Keep it short so /data/blocks (what the du-exporter measures)
+    # is the authoritative long-term figure rather than a double count.
+    retention_period: 24h
+
+compactor:
+  data_dir: /data/compactor
+  sharding_ring:
+    kvstore:
+      store: memberlist
+
+distributor:
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: memberlist
+
+ingester:
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: memberlist
+    replication_factor: 1
+
+store_gateway:
+  sharding_ring:
+    replication_factor: 1
+
+ruler_storage:
+  backend: filesystem
+  filesystem:
+    dir: /data/rules
+
+# Lets one Grafana datasource query "otlp|remotewrite" together, which is how
+# the side-by-side comparison panels are built.
+tenant_federation:
+  enabled: true
+
+limits:
+  # Sized for a SNO forwarding *everything*. Mimir's defaults (10k samples/s,
+  # 150k series) are an order of magnitude too small for this cluster and would
+  # silently drop samples, which would quietly invalidate the sizing numbers.
+  ingestion_rate: 200000
+  ingestion_burst_size: 2000000
+  max_global_series_per_user: 3000000
+  max_global_series_per_metric: 0
+  max_label_names_per_series: 60
+  out_of_order_time_window: 30m
+  native_histograms_ingestion_enabled: true
+  # Must exceed the longest window you intend to measure directly rather than
+  # extrapolate.
+  compactor_blocks_retention_period: 30d

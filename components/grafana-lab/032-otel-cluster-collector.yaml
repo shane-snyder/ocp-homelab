@@ -1,0 +1,76 @@
+# Cluster-scoped collector: signals that exist once per cluster, not per node.
+#
+#   k8s_cluster -> OTLP metrics -> Mimir tenant "otlp"
+#   k8s_events  -> OTLP logs    -> Loki
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-cluster
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "12"
+spec:
+  mode: deployment
+  replicas: 1
+  serviceAccount: otel-collector
+  managementState: managed
+  upgradeStrategy: none
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: "2", memory: 2Gi }
+  config:
+    receivers:
+      k8s_cluster:
+        collection_interval: 30s
+        auth_type: serviceAccount
+        node_conditions_to_report: [Ready, MemoryPressure, DiskPressure, PIDPressure]
+        allocatable_types_to_report: [cpu, memory, ephemeral-storage, storage]
+      k8s_events:
+        auth_type: serviceAccount
+
+    processors:
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 75
+        spike_limit_percentage: 20
+      resourcedetection:
+        detectors: [env, openshift]
+        override: false
+        timeout: 5s
+      batch:
+        timeout: 5s
+        send_batch_size: 8192
+        send_batch_max_size: 16384
+
+    exporters:
+      otlphttp/loki:
+        endpoint: http://loki.grafana-lab.svc.cluster.local:3100/otlp
+        compression: gzip
+        retry_on_failure:
+          enabled: true
+      otlphttp/mimir:
+        endpoint: http://mimir.grafana-lab.svc.cluster.local:8080/otlp
+        compression: gzip
+        headers:
+          X-Scope-OrgID: otlp
+        retry_on_failure:
+          enabled: true
+
+    service:
+      telemetry:
+        metrics:
+          readers:
+            - pull:
+                exporter:
+                  prometheus:
+                    host: 0.0.0.0
+                    port: 8888
+      pipelines:
+        metrics:
+          receivers: [k8s_cluster]
+          processors: [memory_limiter, resourcedetection, batch]
+          exporters: [otlphttp/mimir]
+        logs:
+          receivers: [k8s_events]
+          processors: [memory_limiter, resourcedetection, batch]
+          exporters: [otlphttp/loki]

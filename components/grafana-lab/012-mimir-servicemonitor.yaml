@@ -1,0 +1,22 @@
+# Scraped by user-workload monitoring, which is what puts cortex_* and
+# telemetry_lab_* in front of the Thanos Querier where the sizing queries run.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mimir
+  namespace: grafana-lab
+  labels:
+    app.kubernetes.io/part-of: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mimir
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 30s
+    - port: du-metrics
+      path: /metrics
+      interval: 60s

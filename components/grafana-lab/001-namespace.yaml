@@ -1,0 +1,19 @@
+# Telemetry storage-sizing lab.
+#
+# Three independent ingest paths land here so each one's on-disk cost can be
+# measured separately:
+#
+#   OTel collectors --OTLP logs-->     Loki            (own PVC)
+#   OTel collectors --OTLP metrics-->  Mimir tenant "otlp"
+#   platform Prometheus --remote_write--> Mimir tenant "remotewrite"
+#
+# Deliberately NOT labelled openshift.io/cluster-monitoring=true: the
+# ServiceMonitors here are scraped by user-workload monitoring, and the sizing
+# queries are run against the Thanos Querier which merges platform + UWM.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grafana-lab
+  annotations:
+    openshift.io/display-name: "Grafana telemetry storage sizing lab"
+    argocd.argoproj.io/sync-wave: "1"

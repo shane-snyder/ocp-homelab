@@ -1,0 +1,20 @@
+# otelcol_exporter_sent_* is the "what left the collector" side of the ledger.
+# Pairing it with what Mimir and Loki report as received is what catches silent
+# drops - a dropped batch would otherwise just look like a smaller cluster.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collectors
+  namespace: grafana-lab
+  labels:
+    app.kubernetes.io/part-of: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "13"
+spec:
+  selector:
+    matchLabels:
+      operator.opentelemetry.io/collector-monitoring-service: Exists
+  endpoints:
+    - port: monitoring
+      path: /metrics
+      interval: 30s

@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: grafana-lab
+
+resources:
+  - 001-namespace.yaml
+  - 002-rbac-monitoring-reader.yaml
+  - 010-mimir-statefulset.yaml
+  - 011-mimir-service.yaml
+  - 012-mimir-servicemonitor.yaml
+  - 020-loki-statefulset.yaml
+  - 021-loki-service.yaml
+  - 022-loki-servicemonitor.yaml
+  - 030-otel-rbac.yaml
+  - 031-otel-node-collector.yaml
+  - 032-otel-cluster-collector.yaml
+  - 033-otel-servicemonitor.yaml
+  - 040-grafana.yaml
+  - 041-grafana-datasources.yaml
+  - 042-grafana-dashboard-sizing.yaml
+
+# Hashed names so a config change actually rolls the pods. A silently stale
+# Mimir or Loki config would produce plausible-looking numbers for the wrong
+# settings, which is worse than an obvious failure.
+configMapGenerator:
+  - name: mimir-config
+    files:
+      - mimir.yaml=config/mimir.yaml
+  - name: loki-config
+    files:
+      - loki.yaml=config/loki.yaml
+  - name: du-exporter
+    files:
+      - du_exporter.py=config/du_exporter.py
+
+generatorOptions:
+  labels:
+    app.kubernetes.io/part-of: grafana-lab

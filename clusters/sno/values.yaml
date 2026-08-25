@@ -568,6 +568,57 @@ applications:
     syncOptions:
       - CreateNamespace=true
 
+  # --- Grafana Operator (sync-wave 5) ---
+  # Backs the telemetry storage sizing lab below.
+  grafana-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/grafana-operator
+    destination:
+      namespace: grafana-operator
+
+  # --- Telemetry Storage Sizing Lab (sync-wave 12) ---
+  # Loki + Mimir + OTel collectors + Grafana. Measures the on-disk cost of
+  # OTLP logs, OTLP metrics and Prometheus remote_write metrics separately.
+  # See components/grafana-lab/README.md for the sizing queries.
+  grafana-lab:
+    annotations:
+      argocd.argoproj.io/sync-wave: "12"
+      # The OpenTelemetry operator's defaulting webhook rewrites the collector
+      # spec on admission (configVersions, update strategies, ipFamilyPolicy,
+      # ...). ServerSideDiff compares against what the API server would
+      # actually store, so those defaults stop showing up as drift.
+      argocd.argoproj.io/compare-options: IgnoreExtraneous,ServerSideDiff=true
+    source:
+      path: components/grafana-lab
+    destination:
+      namespace: grafana-lab
+    extraFields: |
+      ignoreDifferences:
+        # Token is minted by the service account token controller, never by git.
+        - group: ""
+          kind: Secret
+          name: grafana-monitoring-reader-token
+          jsonPointers:
+            - /data
+            - /metadata/annotations/kubernetes.io~1service-account.uid
+
+  # --- Cluster Monitoring Config (sync-wave 18) ---
+  # Adds the remote_write feed into grafana-lab's Mimir. Waits until after the
+  # lab is up so Prometheus is not retrying against an endpoint that does not
+  # exist yet. Also raises user-workload Prometheus retention to 30d so the
+  # measurement window is not capped at a day. Both ConfigMaps here were
+  # previously unmanaged -- read the warning at the top of each before the
+  # first sync.
+  cluster-monitoring:
+    annotations:
+      argocd.argoproj.io/sync-wave: "18"
+    source:
+      path: clusters/sno/overlays/cluster-monitoring
+    destination:
+      namespace: openshift-monitoring
+
   # --- OCP Apps (sync-wave 10, app-of-apps for health-monitoring) ---
   ocp-apps:
     annotations:

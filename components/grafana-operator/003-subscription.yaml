@@ -1,0 +1,15 @@
+# grafana-operator v5 ships from the community-operators catalog (same source
+# already used by cert-utils-operator and external-secrets-operator).
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: grafana-operator
+  namespace: grafana-operator
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  channel: v5
+  installPlanApproval: Automatic
+  name: grafana-operator
+  source: community-operators
+  sourceNamespace: openshift-marketplace
