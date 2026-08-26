@@ -9,7 +9,7 @@ spec:
       - default: false
         deviceSelector:
           paths:
-            - /dev/sdc
+            - /dev/disk/by-id/wwn-0x61866da096299f002ea5c0192fbc49f2
         fstype: xfs
         name: minio
         thinPoolConfig:
@@ -19,7 +19,7 @@ spec:
       - default: true
         deviceSelector:
           paths:
-            - /dev/sdb
+            - /dev/disk/by-id/wwn-0x61866da096299f002ea5bf4c238028e7
         fstype: xfs
         name: dell
         thinPoolConfig:
