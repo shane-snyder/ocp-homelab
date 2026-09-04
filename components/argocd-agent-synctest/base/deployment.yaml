@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synctest
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    app: synctest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: synctest
+  template:
+    metadata:
+      labels:
+        app: synctest
+    spec:
+      containers:
+        - name: httpd
+          image: registry.access.redhat.com/ubi9/httpd-24:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

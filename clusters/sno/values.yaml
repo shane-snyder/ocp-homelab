@@ -648,3 +648,35 @@ applications:
       path: clusters/sno
     destination:
       namespace: argocd-agent
+
+  # --- argocd-agent sync repro fixtures (sync-wave 20) ---
+  # Three identical throwaway apps used to reproduce the argocd-agent sync
+  # stall: syncing several apps at once, or one app whose resources sit on
+  # separate sync-waves, sometimes applies the first item and then hangs.
+  # Each app ships Namespace/Deployment/Service/Route on waves 0/1/2/3 so a
+  # single app sync has four sequential phases.
+  # Delete by pointing the paths at an empty overlay - see
+  # components/aap-instance/disabled for the pattern. Do NOT drop the entries.
+  synctest-1:
+    annotations:
+      argocd.argoproj.io/sync-wave: "20"
+    source:
+      path: components/argocd-agent-synctest/app1
+    destination:
+      namespace: synctest-1
+
+  synctest-2:
+    annotations:
+      argocd.argoproj.io/sync-wave: "20"
+    source:
+      path: components/argocd-agent-synctest/app2
+    destination:
+      namespace: synctest-2
+
+  synctest-3:
+    annotations:
+      argocd.argoproj.io/sync-wave: "20"
+    source:
+      path: components/argocd-agent-synctest/app3
+    destination:
+      namespace: synctest-3

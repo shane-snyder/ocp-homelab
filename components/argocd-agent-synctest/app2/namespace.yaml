@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: synctest-2
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    app-source: ocp-homelab
+    purpose: argocd-agent-synctest
