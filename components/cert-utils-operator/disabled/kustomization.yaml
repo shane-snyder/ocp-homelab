@@ -1,0 +1,16 @@
+---
+# Intentionally empty: the "cert-utils-operator is switched off" target.
+#
+# The operator installed AllNamespaces, so OLM copied its CSV into all ~219
+# namespaces, and the controller sat at 1.1GiB / 48m with 1227 restarts. Its
+# only consumers here were two `generate-cert-info` annotations, which merely
+# added an informational tls.crt.info field to the api/ingress cert secrets.
+#
+# The app must stay declared and point here rather than being dropped from
+# values.yaml: argocd-agent autonomous mode recreates deleted Applications, so
+# an undeclared app is stranded Synced/Healthy and keeps reinstalling the
+# operator - which is exactly how this one survived commit 84d8dbf.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources: []

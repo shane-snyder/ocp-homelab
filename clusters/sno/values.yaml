@@ -71,6 +71,18 @@ applications:
     destination:
       namespace: openshift-config
 
+  # --- cert-utils-operator: OFF (sync-wave 5) ---
+  # Declared but empty on purpose. It must stay declared to stay managed - see
+  # components/cert-utils-operator/disabled. To switch back on, point the path
+  # at components/cert-utils-operator and sync.
+  cert-utils-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/cert-utils-operator/disabled
+    destination:
+      namespace: cert-utils-operator
+
   # --- Shared Operators (sync-wave 5) ---
   cert-manager-operator:
     annotations:

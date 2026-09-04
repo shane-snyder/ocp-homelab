@@ -12,6 +12,3 @@ spec:
     name: letsencrypt-cloudflare
   renewBefore: 168h
   secretName: replaceme
-  secretTemplate:
-    annotations:
-      cert-utils-operator.redhat-cop.io/generate-cert-info: "true"
