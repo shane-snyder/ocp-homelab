@@ -3,11 +3,14 @@ kind: Deployment
 metadata:
   name: synctest
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "2"
   labels:
     app: synctest
 spec:
   replicas: 1
+  # Default is 600s. Kept short so a wave that never goes Healthy fails in
+  # about two minutes instead of stalling the run for ten.
+  progressDeadlineSeconds: 120
   selector:
     matchLabels:
       app: synctest
@@ -22,6 +25,9 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+          volumeMounts:
+            - name: content
+              mountPath: /var/www/html
           readinessProbe:
             httpGet:
               path: /
@@ -34,3 +40,7 @@ spec:
             limits:
               cpu: 100m
               memory: 128Mi
+      volumes:
+        - name: content
+          configMap:
+            name: synctest-content

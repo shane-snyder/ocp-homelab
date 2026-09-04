@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: synctest-content
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    app: synctest
+data:
+  # ubi9/httpd-24 ships an empty /var/www/html and has autoindex off, so with
+  # no index.html every request - including the readiness probe - gets a 403.
+  index.html: |
+    <html><body><h1>argocd-agent synctest</h1></body></html>

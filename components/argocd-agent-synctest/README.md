@@ -6,9 +6,17 @@ the first item and then sits with the operation neither progressing nor
 failing.
 
 `app1`, `app2` and `app3` are identical apart from their namespace. Each ships
-a Namespace, Deployment (`ubi9/httpd-24`), Service and Route on sync-waves
-0/1/2/3, so a single app sync has four sequential phases and three apps synced
-together give twelve.
+a Namespace, ConfigMap, Deployment (`ubi9/httpd-24`), Service and Route on
+sync-waves 0/1/2/3/4, so a single app sync has five sequential phases and three
+apps synced together give fifteen.
+
+The ConfigMap is not incidental: `ubi9/httpd-24` ships an empty `/var/www/html`
+with autoindex off, so without an `index.html` every request - the readiness
+probe included - gets a 403. The Deployment then applies cleanly but never goes
+Healthy, and the sync sits on that wave until `progressDeadlineSeconds` expires
+(cut from the 600s default to 120s here). That is worth remembering when
+triaging the real thing: an app that "syncs one resource then sits" may just be
+waiting on an earlier wave that will never become Healthy.
 
 Declared on sno as `synctest-1/2/3` at sync-wave 20 (`clusters/sno/values.yaml`).
 All three are manual-sync like every other child app.
