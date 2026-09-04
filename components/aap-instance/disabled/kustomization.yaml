@@ -1,0 +1,15 @@
+---
+# Intentionally empty: the "AAP is switched off" target.
+#
+# Point the ansible-automation-platform app at this path and sync with prune to
+# tear AAP down; point it back at components/aap-instance to bring it back.
+#
+# Why not `enabled: false` on the app? argocd-agent runs in autonomous mode and
+# the principal recreates any deleted Application - including one ArgoCD itself
+# prunes ("Unauthorized deletion detected - recreating"). Removing an app from
+# values.yaml therefore strands its Application forever. Emptying the app's
+# content is the only removal that actually holds.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources: []

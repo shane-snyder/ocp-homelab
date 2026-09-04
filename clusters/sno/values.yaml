@@ -300,15 +300,19 @@ applications:
       namespace: ansible-automation-platform
 
   # --- Ansible Automation Platform Instance (sync-wave 10) ---
-  # Temporarily disabled to reclaim ~11GiB RAM / 24 pods on sno.
-  # Re-enable by removing `enabled: false`; the AAP operator stays installed
-  # so a sync recreates the platform (as a fresh install - PVCs were pruned).
+  # AAP is currently OFF to reclaim ~11GiB RAM / 24 pods on sno.
+  #   off -> path: components/aap-instance/disabled   (renders nothing)
+  #   on  -> path: components/aap-instance
+  # Flip the path, push, then sync the app (with prune when switching off).
+  # Do NOT use `enabled: false` here: argocd-agent autonomous mode recreates any
+  # deleted Application, so dropping the app from this file only strands it.
+  # Switching back on also needs the operator scaled up - see
+  # components/aap-operator/install.yaml.
   ansible-automation-platform:
-    enabled: false
     annotations:
       argocd.argoproj.io/sync-wave: "10"
     source:
-      path: components/aap-instance
+      path: components/aap-instance/disabled
     destination:
       namespace: ansible-automation-platform
     syncOptions:

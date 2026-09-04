@@ -27,9 +27,13 @@ metadata:
   namespace: ansible-automation-platform
 spec:
   channel: stable-2.6
-  # Manual while AAP is scaled to zero: an automatic z-stream upgrade reinstalls
+  # Manual while AAP is switched off: an automatic z-stream upgrade reinstalls
   # the CSV, which restores replicas=1 on all seven controller-managers and
-  # silently undoes the scale-down. Set back to Automatic when AAP is re-enabled.
+  # silently undoes the scale-down. Set back to Automatic when AAP is switched
+  # back on, and scale the controller-managers up again:
+  #   oc get deploy -n ansible-automation-platform -o name \
+  #     | grep operator-controller-manager \
+  #     | xargs -I{} oc scale {} -n ansible-automation-platform --replicas=1
   installPlanApproval: Manual
   name: ansible-automation-platform-operator
   source: redhat-operators
