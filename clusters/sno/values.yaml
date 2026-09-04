@@ -300,7 +300,11 @@ applications:
       namespace: ansible-automation-platform
 
   # --- Ansible Automation Platform Instance (sync-wave 10) ---
+  # Temporarily disabled to reclaim ~11GiB RAM / 24 pods on sno.
+  # Re-enable by removing `enabled: false`; the AAP operator stays installed
+  # so a sync recreates the platform (as a fresh install - PVCs were pruned).
   ansible-automation-platform:
+    enabled: false
     annotations:
       argocd.argoproj.io/sync-wave: "10"
     source:
