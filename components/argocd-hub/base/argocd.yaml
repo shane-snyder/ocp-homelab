@@ -92,6 +92,7 @@ spec:
       g, cluster-admins, role:admin
     scopes: '[groups]'
   repo:
+    serviceaccount: argocd-argocd-repo
     resources:
       limits:
         cpu: "1"
