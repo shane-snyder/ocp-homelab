@@ -6,8 +6,8 @@
 #                                        flows are enriched with the VM/pod
 #                                        instead of an anonymous MAC.
 #
-# sampling: 1 captures every flow — ideal for discovery, heavier on resources.
-# Raise it (default 50) once policies are authored and you only need spot checks.
+# sampling: 50 (default) samples 1 in 50 packets. Drop to 1 temporarily to
+# capture every flow for discovery — it roughly saturates the 1x.demo Loki.
 apiVersion: flows.netobserv.io/v1beta2
 kind: FlowCollector
 metadata:
@@ -21,7 +21,7 @@ spec:
     type: eBPF
     ebpf:
       privileged: true
-      sampling: 1
+      sampling: 50
       # PacketDrop: report dropped packets + cause. NetworkEvents: correlate each
       # flow to the (Multi)NetworkPolicy that allowed/denied it -> the feedback
       # signal for "what would default-deny break" and for catching missed rules.
@@ -37,6 +37,9 @@ spec:
   loki:
     enable: true
     mode: LokiStack
+    # Must stay under the LokiStack ingestion burst (6MB on 1x.demo); the 10MB
+    # default produces batches Loki can never accept (429 -> dropped).
+    writeBatchSize: 4194304
     lokiStack:
       name: netobserv-loki
       namespace: netobserv
