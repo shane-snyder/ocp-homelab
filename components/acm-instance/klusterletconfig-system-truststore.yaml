@@ -1,0 +1,18 @@
+---
+# Managed clusters reach the hub API at api.sno.shanehomelab.com, which serves a
+# Let's Encrypt cert. The default (UseAutoDetectedCABundle) pins the hub's leaf +
+# intermediate into each spoke's bootstrap kubeconfig, so every LE renewal or
+# chain change (e.g. R13 -> YR1/Root YR in Aug 2026) broke the klusterlet with
+# "x509: certificate signed by unknown authority". Verifying with the system
+# trust store survives renewals. Opt a cluster in with the ManagedCluster
+# annotation agent.open-cluster-management.io/klusterlet-config: system-truststore
+# (local-cluster stays on the default; it talks to the hub internally).
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletConfig
+metadata:
+  name: system-truststore
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  hubKubeAPIServerConfig:
+    serverVerificationStrategy: UseSystemTruststore

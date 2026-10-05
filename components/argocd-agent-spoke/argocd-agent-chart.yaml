@@ -416,7 +416,9 @@ spec:
                 key: agent.cache.refresh-interval
                 optional: true
           name: argocd-agent-agent
-          image: "registry.redhat.io/openshift-gitops-1/argocd-agent-rhel9:v1.21.0-7"
+          # must match the hub principal's image (openshift-gitops-operator v1.22.0 on sno);
+          # agent/principal version skew fails auth with "version mismatch"
+          image: "registry.redhat.io/openshift-gitops-1/argocd-agent-rhel9@sha256:0e5661f4e3631c26279445d1715566c15c7863f3cdc9ff5469bfcee9abba9957"
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
