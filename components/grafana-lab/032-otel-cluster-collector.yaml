@@ -1,7 +1,8 @@
 # Cluster-scoped collector: signals that exist once per cluster, not per node.
 #
-#   k8s_cluster -> OTLP metrics -> Mimir tenant "otlp"
-#   k8s_events  -> OTLP logs    -> Loki
+#   k8s_cluster          -> OTLP metrics -> Mimir tenant "otlp"
+#   prometheus/kubevirt  -> OTLP metrics -> Mimir tenant "otlp"
+#   k8s_events           -> OTLP logs    -> Loki
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
@@ -27,6 +28,38 @@ spec:
         allocatable_types_to_report: [cpu, memory, ephemeral-storage, storage]
       k8s_events:
         auth_type: serviceAccount
+      # VM metrics. No OTel receiver understands KubeVirt, so read its own
+      # Prometheus endpoint: virt-handler (one per node) has the per-VMI usage
+      # series, virt-controller has kubevirt_vmi_info. The endpoint is HTTPS
+      # with a self-signed cert and no auth. The kubevirt-prometheus-metrics
+      # service is headless with no port 443 behind it, so pods are scraped
+      # directly. One deployment scraping every virt-handler is fine at this
+      # size; on a large fleet move that job into the node DaemonSet.
+      prometheus/kubevirt:
+        config:
+          scrape_configs:
+            - job_name: kubevirt
+              scrape_interval: 30s
+              scheme: https
+              tls_config:
+                insecure_skip_verify: true
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names: [openshift-cnv]
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_pod_label_kubevirt_io]
+                  regex: virt-handler|virt-controller
+                  action: keep
+                - source_labels: [__meta_kubernetes_pod_container_port_number]
+                  regex: "8443"
+                  action: keep
+              metric_relabel_configs:
+                # Each pod also exposes 1-3k lines of Go runtime and client
+                # metrics that say nothing about VMs.
+                - source_labels: [__name__]
+                  regex: kubevirt_vmi_.*
+                  action: keep
 
     processors:
       memory_limiter:
@@ -67,7 +100,7 @@ spec:
                     port: 8888
       pipelines:
         metrics:
-          receivers: [k8s_cluster]
+          receivers: [k8s_cluster, prometheus/kubevirt]
           processors: [memory_limiter, resourcedetection, batch]
           exporters: [otlphttp/mimir]
         logs:
