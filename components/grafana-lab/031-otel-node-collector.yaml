@@ -21,6 +21,11 @@ spec:
   securityContext:
     privileged: true
     runAsUser: 0
+  # hostmetrics reads /proc/net through the collector's own network namespace,
+  # whatever root_path says. In the pod network it reports the pod's eth0, not
+  # the node's NICs. The host network also gives host.name the node's name
+  # rather than the pod's, which otherwise changed on every pod restart.
+  hostNetwork: true
   tolerations:
     - operator: Exists
   env:
@@ -32,6 +37,19 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: status.podIP
+    # The kubelet is addressed by IP, not by node name: node names are not
+    # guaranteed to resolve to the node from inside the pod network, and a
+    # name that resolves somewhere else yields a 401 from a kubelet that has
+    # no idea who this token belongs to.
+    - name: K8S_NODE_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+    # Read by the resourcedetection "env" detector. hostmetrics has no pod to
+    # associate with, so without this its series carry no k8s.node.name and
+    # cannot be joined to the kubeletstats / k8s_cluster series per node.
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: k8s.node.name=$(K8S_NODE_NAME)
   volumes:
     - name: varlogpods
       hostPath:
@@ -55,10 +73,20 @@ spec:
       # Checkpoints filelog's read offsets on the host. Without it a collector
       # restart re-reads from the file start and double-counts, which would
       # show up as a phantom spike in the log volume being measured.
+      #
+      # The bbolt file once corrupted on an unclean shutdown and the collector
+      # panicked on every start for weeks after (checkInvariantProperties in
+      # freepages). fsync makes each checkpoint durable before it is relied
+      # on. bbolt never shrinks its file on its own, and this one had grown
+      # to 200Mi; compaction on start rewrites it to its live size.
       file_storage/checkpoints:
         directory: /var/lib/otelcol
         create_directory: true
         timeout: 10s
+        fsync: true
+        compaction:
+          on_start: true
+          directory: /var/lib/otelcol
 
     receivers:
       filelog:
@@ -83,7 +111,7 @@ spec:
       kubeletstats:
         collection_interval: 30s
         auth_type: serviceAccount
-        endpoint: https://${env:K8S_NODE_NAME}:10250
+        endpoint: https://${env:K8S_NODE_IP}:10250
         insecure_skip_verify: true
         metric_groups: [node, pod, container, volume]
 
@@ -95,7 +123,12 @@ spec:
           load: {}
           memory: {}
           disk: {}
-          network: {}
+          # Physical NICs only. On the host network the node has one OVN
+          # interface per pod (~475 on sno), each a full set of series.
+          network:
+            include:
+              interfaces: ["^(eno|ens|enp|eth|bond)[0-9a-z]+$"]
+              match_type: regexp
           paging: {}
           processes: {}
           filesystem:
