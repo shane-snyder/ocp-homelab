@@ -4,5 +4,6 @@ kind: Kustomization
 resources:
   - 001-namespace.yaml
   - 002-external-secret-loki-s3.yaml
+  - 002-operator-secret-rbac.yaml
   - 003-lokistack.yaml
   - 004-flowcollector.yaml
