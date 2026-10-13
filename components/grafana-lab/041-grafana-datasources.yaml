@@ -140,3 +140,30 @@ spec:
       httpHeaderName1: Authorization
     secureJsonData:
       httpHeaderValue1: "Bearer ${token}"
+---
+# ACM observability's fleet-wide Thanos: every managed cluster's forwarded
+# platform metrics, each tagged with a cluster label. In-cluster query-frontend
+# needs no token (rbac-query-proxy is only in front of the external route).
+# Backs the OpenShift & operator lifecycle dashboard.
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: acm-observability
+  namespace: grafana-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana-lab
+  datasource:
+    uid: acm-observability
+    name: ACM Observability (fleet)
+    type: prometheus
+    access: proxy
+    url: http://observability-thanos-query-frontend.open-cluster-management-observability.svc:9090
+    isDefault: false
+    jsonData:
+      httpMethod: POST
+      prometheusType: Thanos
+      timeInterval: 5m

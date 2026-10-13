@@ -19,6 +19,7 @@ resources:
   - 040-grafana.yaml
   - 041-grafana-datasources.yaml
   - 042-grafana-dashboard-sizing.yaml
+  - 043-grafana-dashboard-ocp-lifecycle.yaml
 
 # Hashed names so a config change actually rolls the pods. A silently stale
 # Mimir or Loki config would produce plausible-looking numbers for the wrong

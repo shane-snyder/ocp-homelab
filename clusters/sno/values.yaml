@@ -680,3 +680,28 @@ applications:
       path: components/argocd-agent-synctest/app3
     destination:
       namespace: synctest-3
+
+  # --- Red Hat lifecycle exporter (sync-wave 10) ---
+  # Polls the Red Hat Product Life Cycle API and exports this cluster's
+  # OpenShift and operator support phases and compatibility. ACM observability
+  # forwards the series to the hub, where grafana-lab's "OpenShift & operator
+  # lifecycle" dashboard reads them.
+  ocp-lifecycle-exporter:
+    annotations:
+      argocd.argoproj.io/sync-wave: "10"
+    source:
+      path: components/ocp-lifecycle-exporter
+    destination:
+      namespace: ocp-lifecycle
+
+  # --- Red Hat lifecycle exporter build pipeline (sync-wave 11) ---
+  # Polls github.com/shane-snyder/ocp-lifecycle-dashboard and builds the
+  # exporter into quay-server.apps.sno.shanehomelab.com/ocp-lifecycle. Hub
+  # only: Quay and OpenShift Pipelines live here, every cluster pulls the image.
+  ocp-lifecycle-exporter-pipeline:
+    annotations:
+      argocd.argoproj.io/sync-wave: "11"
+    source:
+      path: components/ocp-lifecycle-exporter-pipeline
+    destination:
+      namespace: ocp-lifecycle

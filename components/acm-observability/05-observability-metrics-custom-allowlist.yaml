@@ -138,6 +138,31 @@ data:
       - container_cpu_usage_seconds_total
       - subscription_sync_total
       - kube_node_labels
+      # Red Hat lifecycle exporter (components/ocp-lifecycle-exporter). Its
+      # namespace is platform-monitored so these federate like any other
+      # platform metric. ~500 series per cluster.
+      - ocp_lifecycle_api_last_success_timestamp_seconds
+      - ocp_lifecycle_cluster_last_success_timestamp_seconds
+      - ocp_lifecycle_cluster_info
+      - ocp_lifecycle_cluster_status
+      - ocp_lifecycle_cluster_support_phase
+      - ocp_lifecycle_cluster_current_phase_end_timestamp_seconds
+      - ocp_lifecycle_cluster_support_end_timestamp_seconds
+      - ocp_lifecycle_cluster_extended_support_end_timestamp_seconds
+      - ocp_lifecycle_ocp_version_support_phase
+      - ocp_lifecycle_ocp_version_phase_end_timestamp_seconds
+      - ocp_lifecycle_ocp_version_support_end_timestamp_seconds
+      - ocp_lifecycle_ocp_version_extended_support_end_timestamp_seconds
+      - ocp_lifecycle_operator_info
+      - ocp_lifecycle_operator_status
+      - ocp_lifecycle_operator_support_phase
+      - ocp_lifecycle_operator_current_phase_end_timestamp_seconds
+      - ocp_lifecycle_operator_support_end_timestamp_seconds
+      - ocp_lifecycle_operator_extended_support_end_timestamp_seconds
+      - ocp_lifecycle_operator_compatible_with_cluster
+      - ocp_lifecycle_operator_compatible_with_target
+      - ocp_lifecycle_operator_ocp_compatibility
+      - ocp_lifecycle_operator_recommended_version_info
     collect_rules:
       - group: -SNOResourceUsage
   # Remove every name/match from the default uwl_metrics_list (HyperShift HCP
