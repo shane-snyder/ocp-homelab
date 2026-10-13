@@ -56,11 +56,15 @@ spec:
             - name: poller
               image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
               env:
+                # The repo is public, so polling works anonymously (60 API
+                # calls/h per IP; this uses ~12). Create a github-token Secret
+                # to authenticate instead.
                 - name: GITHUB_TOKEN
                   valueFrom:
                     secretKeyRef:
                       name: github-token
                       key: token
+                      optional: true
                 - { name: GITHUB_REPO, value: shane-snyder/ocp-lifecycle-dashboard }
                 - { name: WATCH_BRANCH, value: main }
                 - { name: CONFIGMAP_NAME, value: pipeline-poll-status }
@@ -70,8 +74,12 @@ spec:
                 - |
                   set -euo pipefail
                   api() {
-                    curl -sf -H "Authorization: token ${GITHUB_TOKEN}" \
-                      -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${GITHUB_REPO}/$1"
+                    local url="https://api.github.com/repos/${GITHUB_REPO}/$1"
+                    if [ -n "${GITHUB_TOKEN:-}" ]; then
+                      curl -sf -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" "$url"
+                    else
+                      curl -sf -H "Accept: application/vnd.github.v3+json" "$url"
+                    fi
                   }
 
                   NEW_SHA=$(api "branches/${WATCH_BRANCH}" | python3 -c \
