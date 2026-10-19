@@ -1,7 +1,8 @@
 # Cluster-scoped collector: signals that exist once per cluster, not per node.
 #
 #   k8s_cluster          -> OTLP metrics -> Mimir tenant "otlp"
-#   prometheus/kubevirt  -> OTLP metrics -> Mimir tenant "otlp"
+#   prometheus           -> OTLP metrics -> Mimir tenant "otlp"
+#     (scrape jobs: kubevirt, ocp-lifecycle)
 #   k8s_events           -> OTLP logs    -> Loki
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
@@ -35,7 +36,9 @@ spec:
       # service is headless with no port 443 behind it, so pods are scraped
       # directly. One deployment scraping every virt-handler is fine at this
       # size; on a large fleet move that job into the node DaemonSet.
-      prometheus/kubevirt:
+      # One receiver, one scrape job per source: they share the pipeline, and
+      # each job keeps its own job label.
+      prometheus:
         config:
           scrape_configs:
             - job_name: kubevirt
@@ -60,9 +63,7 @@ spec:
                 - source_labels: [__name__]
                   regex: kubevirt_vmi_.*
                   action: keep
-      prometheus/ocp-lifecycle:
-        config:
-          scrape_configs:
+            # Red Hat lifecycle exporter (components/ocp-lifecycle-exporter).
             - job_name: ocp-lifecycle
               scrape_interval: 30s
               static_configs:
@@ -117,7 +118,7 @@ spec:
                     port: 8888
       pipelines:
         metrics:
-          receivers: [k8s_cluster, prometheus/kubevirt, prometheus/ocp-lifecycle]
+          receivers: [k8s_cluster, prometheus]
           processors: [memory_limiter, resourcedetection, transform/cluster-name, batch]
           exporters: [otlphttp/mimir]
         logs:
