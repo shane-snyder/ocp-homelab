@@ -194,6 +194,17 @@ spec:
         detectors: [env, openshift, system]
         override: false
         timeout: 5s
+      # The openshift detector reports the infrastructure name, which is the
+      # cluster name plus a random 5-character suffix (sno-ngnxh). Drop the
+      # suffix so k8s.cluster.name is the name the cluster was installed with.
+      # Only the final "-xxxxx" goes: my-cluster-01-xsahr -> my-cluster-01.
+      transform/cluster-name:
+        metric_statements:
+          - statements:
+              - replace_pattern(resource.attributes["k8s.cluster.name"], "-[a-z0-9]{5}$", "")
+        log_statements:
+          - statements:
+              - replace_pattern(resource.attributes["k8s.cluster.name"], "-[a-z0-9]{5}$", "")
       batch:
         timeout: 5s
         send_batch_size: 8192
@@ -232,9 +243,9 @@ spec:
       pipelines:
         logs:
           receivers: [filelog]
-          processors: [memory_limiter, k8sattributes, resourcedetection, batch]
+          processors: [memory_limiter, k8sattributes, resourcedetection, transform/cluster-name, batch]
           exporters: [otlphttp/loki]
         metrics:
           receivers: [kubeletstats, hostmetrics]
-          processors: [memory_limiter, k8sattributes, resourcedetection, batch]
+          processors: [memory_limiter, k8sattributes, resourcedetection, transform/cluster-name, batch]
           exporters: [otlphttp/mimir]
