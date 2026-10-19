@@ -60,7 +60,13 @@ spec:
                 - source_labels: [__name__]
                   regex: kubevirt_vmi_.*
                   action: keep
-
+      prometheus/ocp-lifecycle:
+        config:
+          scrape_configs:
+            - job_name: ocp-lifecycle
+              scrape_interval: 30s
+              static_configs:
+                - targets: ["ocp-lifecycle.ocp-lifecycle.svc:9120"]
     processors:
       memory_limiter:
         check_interval: 5s
@@ -88,7 +94,13 @@ spec:
           X-Scope-OrgID: otlp
         retry_on_failure:
           enabled: true
-
+      otlphttp/ocp-lifecycle:
+        endpoint: http://ocp-lifecycle.ocp-lifecycle.svc.cluster.local:9120/otlp
+        compression: gzip
+        headers:
+          X-Scope-OrgID: otlp
+        retry_on_failure:
+          enabled: true
     service:
       telemetry:
         metrics:
