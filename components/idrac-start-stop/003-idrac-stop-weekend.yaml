@@ -25,7 +25,21 @@ spec:
                 echo "cert expiring on $EXPIRY_DATE"
                 exit 0
               else
-                ipmitool -I lanplus -H "$IDRAC_HOST" -U "$IDRAC_USER" -P "$IDRAC_PASSWORD" chassis power off
+                ipmi() { ipmitool -I lanplus -H "$IDRAC_HOST" -U "$IDRAC_USER" -P "$IDRAC_PASSWORD" "$@"; }
+                # ACPI soft-off -> systemd shutdown -> kubelet graceful node shutdown
+                # (pods get SIGTERM and time to flush). Hard off only if that stalls.
+                ipmi chassis power soft
+                i=0
+                while [ $i -lt 90 ]; do
+                  sleep 10
+                  i=$((i+1))
+                  if ipmi chassis power status | grep -q "is off"; then
+                    echo "Host powered off cleanly after $((i*10))s"
+                    exit 0
+                  fi
+                done
+                echo "Host still on after 15m, forcing power off"
+                ipmi chassis power off
               fi
             env:
             - name: API_SERVER
