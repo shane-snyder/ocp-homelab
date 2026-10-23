@@ -12,6 +12,11 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   size: 1x.demo
+  # Flow logs are disposable; cap what lands in the shared Garage bucket.
+  limits:
+    global:
+      retention:
+        days: 14
   storage:
     schemas:
       - version: v13

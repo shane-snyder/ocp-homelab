@@ -11,6 +11,10 @@ garage:
   blockSize: "1048576"
   compressionLevel: "1"
   rpcBindAddr: "[::]:3901"
+  # sno gets powered off nightly; without fsync an unclean stop corrupted
+  # the LMDB metadata DB (MDB_CORRUPTED, Oct 2026).
+  additionalTopLevelConfig: |
+    metadata_fsync = true
   kubernetesSkipCrd: false
   s3:
     api:
