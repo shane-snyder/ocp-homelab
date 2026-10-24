@@ -232,6 +232,16 @@ applications:
           jsonPointers:
             - /spec/httpSecret
 
+  # --- Kubelet config (sync-wave 6) ---
+  # Cluster-scoped KubeletConfig for the master pool. Spec changes reboot sno.
+  kubelet-config:
+    annotations:
+      argocd.argoproj.io/sync-wave: "6"
+    source:
+      path: clusters/sno/overlays/kubelet-config
+    destination:
+      namespace: openshift-machine-config-operator
+
   # --- Cost Management (sync-wave 6) ---
   cost-management:
     annotations:

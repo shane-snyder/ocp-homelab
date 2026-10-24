@@ -1,0 +1,20 @@
+# Kubelet settings for the sno master pool.
+#
+# shutdownGracePeriod: sno is powered off nightly by the idrac-stop CronJob on
+# sno-mini (ACPI soft-off). Without a grace period the kubelet doesn't hold
+# the shutdown, pods get no time to stop, and Garage's metadata DB was
+# corrupted by it (Oct 2026). Any spec change here re-renders the master
+# MachineConfig and reboots sno.
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: dynamic-node
+spec:
+  autoSizingReserved: true
+  kubeletConfig:
+    maxPods: 1024
+    shutdownGracePeriod: 10m
+    shutdownGracePeriodCriticalPods: 3m
+  machineConfigPoolSelector:
+    matchLabels:
+      pools.operator.machineconfiguration.openshift.io/master: ""
