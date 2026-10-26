@@ -1,0 +1,17 @@
+---
+# MCH creates this CR but leaves its spec alone. Without a storageClassName
+# search-postgres runs on emptyDir and ACM 2.17 fires SearchPVCNotPresent(Critical).
+# The operator then creates PVC <storageClassName>-search.
+apiVersion: search.open-cluster-management.io/v1alpha1
+kind: Search
+metadata:
+  name: search-v2-operator
+  namespace: open-cluster-management
+spec:
+  dbStorage:
+    size: 10Gi
+    storageClassName: lvms-dell
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/infra
+      operator: Exists

@@ -9,3 +9,4 @@ resources:
   - metal-provisioning.yaml
   - agent-service-configuration.yaml
   - klusterletconfig-system-truststore.yaml
+  - search.yaml
