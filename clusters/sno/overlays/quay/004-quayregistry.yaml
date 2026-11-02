@@ -24,6 +24,16 @@ spec:
       managed: true
       overrides:
         replicas: 1
+        # Operator default is 2 CPU request=limit. quay-app runs ~40 supervisord
+        # workers that all import at boot; at 2 CPU it was 82% CFS-throttled and
+        # gunicorn-web took >150s to bind, so the startup probe killed it forever.
+        resources:
+          requests:
+            cpu: "2"
+            memory: 8Gi
+          limits:
+            cpu: "6"
+            memory: 8Gi
         env:
           - name: QUAY_DISTRIBUTED_STORAGE_PREFERENCE
             value: minio
