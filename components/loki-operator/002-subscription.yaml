@@ -10,7 +10,7 @@ spec:
   # stable-6.5 is the default channel as of OCP 4.19. Verify/upgrade with:
   #   oc get packagemanifest loki-operator -n openshift-marketplace \
   #     -o jsonpath='{.status.defaultChannel}{"\n"}{range .status.channels[*]}{.name}{"\n"}{end}'
-  channel: stable-6.5
+  channel: stable-6.7
   name: loki-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace

@@ -452,7 +452,119 @@ applications:
     source:
       path: components/power-monitoring
     destination:
-      namespace: openshift-power-monitoring
+      namespace: openshift-operators
+
+  prometheus-community-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/prometheus-community-operator
+    destination:
+      namespace: prometheus
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  service-mesh-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/service-mesh-operator
+    destination:
+      namespace: openshift-operators
+
+  gatekeeper-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/gatekeeper-operator
+    destination:
+      namespace: openshift-operators
+
+  vertical-pod-autoscaler-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/vertical-pod-autoscaler-operator
+    destination:
+      namespace: openshift-vertical-pod-autoscaler
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  file-integrity-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/file-integrity-operator
+    destination:
+      namespace: openshift-file-integrity
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  lightspeed-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/lightspeed-operator
+    destination:
+      namespace: openshift-lightspeed
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  mtv-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/mtv-operator
+    destination:
+      namespace: openshift-mtv
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  nfd-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/nfd-operator
+    destination:
+      namespace: openshift-nfd
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
 
   # --- Splunk (sync-wave 10) ---
   splunk:

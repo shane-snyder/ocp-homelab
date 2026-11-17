@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../../components/openshift-virtualization-operator
+
+patches:
+  - target:
+      kind: OperatorGroup
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: openshift-cnv-txpfd
+  - target:
+      kind: Subscription
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: kubevirt-hyperconverged

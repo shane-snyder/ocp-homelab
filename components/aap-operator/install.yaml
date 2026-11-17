@@ -26,7 +26,7 @@ metadata:
   name: ansible-automation-platform
   namespace: ansible-automation-platform
 spec:
-  channel: stable-2.6
+  channel: stable-2.7
   # Manual while AAP is switched off: an automatic z-stream upgrade reinstalls
   # the CSV, which restores replicas=1 on all seven controller-managers and
   # silently undoes the scale-down. Set back to Automatic when AAP is switched

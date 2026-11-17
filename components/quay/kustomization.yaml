@@ -8,4 +8,3 @@ resources:
   - 000-quay-subscription.yaml
   - 001-quay-enterprise-namespace.yaml
 
-namespace: quay-enterprise

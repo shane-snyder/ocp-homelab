@@ -85,6 +85,118 @@ applications:
     destination:
       namespace: openshift-pipelines
 
+  custom-metrics-autoscaler:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno-mini/overlays/custom-metrics-autoscaler-operator
+    destination:
+      namespace: openshift-keda
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  metallb-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno-mini/overlays/metallb-operator
+    destination:
+      namespace: metallb-system
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  nmstate-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno-mini/overlays/nmstate-operator
+    destination:
+      namespace: openshift-nmstate
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  openshift-virtualization-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno-mini/overlays/openshift-virtualization-operator
+    destination:
+      namespace: openshift-cnv
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  oadp-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/oadp-operator
+    destination:
+      namespace: openshift-adp
+    syncOptions:
+      - RespectIgnoreDifferences=true
+    extraFields: |
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: OperatorGroup
+          jsonPointers:
+            - /metadata/annotations/olm.providedAPIs
+
+  service-mesh-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/service-mesh-operator
+    destination:
+      namespace: openshift-operators
+
+  power-monitoring:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/power-monitoring
+    destination:
+      namespace: openshift-operators
+
+  grafana-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: clusters/sno-mini/overlays/grafana-operator
+    destination:
+      namespace: openshift-operators
+
+  web-terminal-operator:
+    annotations:
+      argocd.argoproj.io/sync-wave: "5"
+    source:
+      path: components/web-terminal-operator
+    destination:
+      namespace: openshift-operators
+
   # --- Gitops Configuration (sync-wave 3) ---
   gitops-configuration:
     annotations:

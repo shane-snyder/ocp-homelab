@@ -1,0 +1,27 @@
+apiVersion: kepler.system.sustainable.computing.io/v1alpha1
+kind: PowerMonitor
+metadata:
+  name: power-monitor
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  kepler:
+    config:
+      logLevel: info
+      maxTerminated: 500
+      metricLevels:
+        - node
+        - pod
+        - vm
+      sampleRate: 5s
+      staleness: 500ms
+    deployment:
+      nodeSelector:
+        kubernetes.io/os: linux
+      security:
+        allowedSANames:
+          - openshift-user-workload-monitoring:prometheus-user-workload
+        mode: none
+      tolerations:
+        - operator: Exists
