@@ -61,6 +61,18 @@ spec:
     - configOverrides: {}	
       enabled: false	
       name: cluster-api-provider-openshift-assisted
+    - configOverrides: {}	
+      enabled: true	
+      name: cluster-permission	
+    - configOverrides: {}	
+      enabled: false	
+      name: cluster-api-provider-azure-preview	
+    - configOverrides: {}	
+      enabled: false	
+      name: maestro-preview	
+    - configOverrides: {}	
+      enabled: true	
+      name: fleet-navigation
   targetNamespace: multicluster-engine
   tolerations:
   - effect: NoSchedule
